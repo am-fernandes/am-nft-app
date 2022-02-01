@@ -30,7 +30,7 @@ function formatBalance(accountBalance?: BigNumber): string {
 }
 
 export default function WalletConn() {
-  const { activateBrowserWallet, account, deactivate } = useEthers()
+  const { activateBrowserWallet, account } = useEthers()
   const accountBalance = useEtherBalance(account)
 
   function handleConnectWallet() {
