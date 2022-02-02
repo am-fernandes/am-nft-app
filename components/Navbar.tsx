@@ -33,7 +33,7 @@ export default function Navbar() {
           </Typography>
 
           <Spacer />
-          <Button>
+          <Button onClick={() => router.push("/")}>
             Explorar
           </Button>
 
@@ -42,16 +42,15 @@ export default function Navbar() {
             Criar NFT
           </Button>
 
-          <Button>
+          <Button onClick={() => router.push("/my-collection")}>
             Sua coleção
           </Button>
 
           <Spacer />
 
-
           <WalletConn />
         </Toolbar>
       </Nav>
-    </Box>
+    </Box >
   );
 }

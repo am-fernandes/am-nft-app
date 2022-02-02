@@ -11,7 +11,7 @@ import Web3Modal from 'web3modal'
 import { ethers, BigNumber } from "ethers";
 import { WalletContext } from 'context/WalletContext'
 
-const DefaultButton = styled(Button)`
+export const DefaultButton = styled(Button)`
   border-radius: 16px;
   box-shadow: none;
   padding: 8px 20px;

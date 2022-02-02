@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Container from '@mui/material/Container';
 import Navbar from 'components/Navbar'
 import { useState, useContext } from 'react';
@@ -5,6 +6,10 @@ import { create as ipfsHttpClient } from 'ipfs-http-client'
 import { ethers } from 'ethers'
 import Web3Modal from 'web3modal'
 import { WalletContext } from 'context/WalletContext'
+import Grid from '@mui/material/Grid'
+import TextField from '@mui/material/TextField'
+import Button from '@mui/material/Button'
+import FormControl from '@mui/material/FormControl';
 
 //@ts-ignore
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')
@@ -86,37 +91,65 @@ export default function CreateItem() {
     <Container style={{ marginTop: 64 }} className='p-4'>
       <Navbar />
 
-      <div className="w-1/2 flex flex-col pb-12">
-        <input
-          placeholder="Asset Name"
-          className="mt-8 border rounded p-4"
-          onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
-        />
-        <textarea
-          placeholder="Asset Description"
-          className="mt-2 border rounded p-4"
-          onChange={e => updateFormInput({ ...formInput, description: e.target.value })}
-        />
-        <input
-          placeholder="Asset Price in Eth"
-          className="mt-2 border rounded p-4"
-          onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
-        />
-        <input
-          type="file"
-          name="Asset"
-          className="my-4"
-          onChange={onChange}
-        />
-        {
-          fileUrl && (
-            <img className="rounded mt-4" width="350" src={fileUrl} />
-          )
-        }
-        <button onClick={createMarket} className="font-bold mt-4 bg-pink-500 text-white rounded p-4 shadow-lg">
-          Create Digital Asset
-        </button>
-      </div>
+      <Grid container spacing={2} sx={{ marginTop: 16, paddingLeft: '20%', paddingRight: '20%' }}>
+        <Grid item md={4}>
+          <TextField
+            sx={{ width: '100%' }}
+            placeholder="Nome do NFT"
+            onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
+          />
+        </Grid>
+
+        <Grid item md={4}>
+          <TextField
+            sx={{ width: '100%' }}
+            placeholder="Preço da arte em ETH"
+            type="number"
+            onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
+          />
+        </Grid>
+
+        <Grid item md={4}>
+          <TextField
+            sx={{ width: '100%' }}
+            type="file"
+            name="Asset"
+            className="my-4"
+            onChange={onChange}
+          />
+        </Grid>
+
+        <Grid item md={12}>
+          <TextField
+            sx={{ width: '100%' }}
+            placeholder="Descrição da arte"
+            multiline
+            rows={3}
+            onChange={e => updateFormInput({ ...formInput, description: e.target.value })}
+          />
+        </Grid>
+
+
+
+
+
+
+        <Grid item md={12}>
+          {fileUrl && (
+            <img style={{ position: 'relative', left: '50%', transform: 'translateX(-50%)' }} alt="Imagem do NFT" width="150" src={fileUrl} />
+          )}
+        </Grid>
+
+        <Grid item md={12}>
+          <Button variant="contained" color="secondary" onClick={createMarket}>
+            Criar NFT
+          </Button>
+        </Grid>
+
+
+
+
+      </Grid>
     </Container>
   )
 }
