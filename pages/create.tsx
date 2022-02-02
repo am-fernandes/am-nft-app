@@ -1,9 +1,10 @@
 import Container from '@mui/material/Container';
 import Navbar from 'components/Navbar'
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { create as ipfsHttpClient } from 'ipfs-http-client'
 import { ethers } from 'ethers'
-import { useEthers } from '@usedapp/core'
+import Web3Modal from 'web3modal'
+import { WalletContext } from 'context/WalletContext'
 
 //@ts-ignore
 const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')
@@ -20,7 +21,7 @@ export default function CreateItem() {
   const [fileUrl, setFileUrl] = useState(null)
   const [formInput, updateFormInput] = useState({ price: '', name: '', description: '' })
   // const router = useRouter()
-  const { library, connector } = useEthers()
+  const { wallet } = useContext(WalletContext)
 
   async function onChange(e) {
     const file = e.target.files[0]
@@ -56,7 +57,9 @@ export default function CreateItem() {
   }
 
   async function createSale(url) {
-    const provider = library
+    const web3Modal = new Web3Modal()
+    const connection = await web3Modal.connect()
+    const provider = new ethers.providers.Web3Provider(connection)
     const signer = provider.getSigner()
 
     /* next, create the item */

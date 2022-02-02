@@ -1,14 +1,15 @@
-import { useState } from "react";
-import { useEthers, useEtherBalance } from "@usedapp/core";
+import { useState, useContext } from "react";
 import { formatEther } from "@ethersproject/units";
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Wallet from '@mui/icons-material/AccountBalanceWalletOutlined'
 import styled from '@emotion/styled'
-import { BigNumber } from "@usedapp/core/node_modules/ethers";
 import JazzIcon from './JazzIcon'
 import AccountDetails from "./AccountDetails";
 import trimAccount from "helpers/trimAccount";
+import Web3Modal from 'web3modal'
+import { ethers, BigNumber } from "ethers";
+import { WalletContext } from 'context/WalletContext'
 
 const DefaultButton = styled(Button)`
   border-radius: 16px;
@@ -30,11 +31,35 @@ function formatBalance(accountBalance?: BigNumber): string {
 }
 
 export default function WalletConn() {
-  const { activateBrowserWallet, account } = useEthers()
-  const accountBalance = useEtherBalance(account)
+  // const { activateBrowserWallet, account } = useEthers()
+  // const accountBalance = useEtherBalance(account)
 
-  function handleConnectWallet() {
-    activateBrowserWallet();
+  const [address, setAddress] = useState<string>('')
+  const [balance, setBalance] = useState<BigNumber>()
+
+
+  const { editWallet } = useContext(WalletContext)
+
+  async function handleConnectWallet() {
+    const web3Modal = new Web3Modal()
+
+    const instance = await web3Modal.connect();
+
+    const provider = new ethers.providers.Web3Provider(instance);
+    const signer = provider.getSigner();
+
+    const _address = await signer.getAddress()
+    const _balance = await signer.getBalance()
+
+    setAddress(_address)
+    setBalance(_balance)
+
+    editWallet({
+      provider,
+      signer,
+      address: _address,
+      balance: _balance
+    })
   }
 
   const [open, setOpen] = useState(false);
@@ -49,11 +74,11 @@ export default function WalletConn() {
 
   return (
     <>
-      {account ?
+      {address ?
         (<Box style={{ backgroundColor: "#d6d6d6", borderRadius: 16 }}>
-          <span className="ml-4 mr-2 pt-8" style={{ fontSize: 14, fontWeight: '600' }}>{formatBalance(accountBalance)} ETH</span>
+          <span className="ml-4 mr-2 pt-8" style={{ fontSize: 14, fontWeight: '600' }}>{formatBalance(balance)} ETH</span>
           <AccountButton variant="contained" onClick={handleClickOpen}>
-            {trimAccount(account)}
+            {trimAccount(address)}
 
             <JazzIcon />
           </AccountButton>

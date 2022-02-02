@@ -1,10 +1,10 @@
 import '../styles/globals.css'
-import { DAppProvider } from '@usedapp/core'
 import Head from 'next/head';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
+import { WalletProvider } from 'context/WalletContext'
 
 function createEmotionCache() {
   return createCache({ key: 'css', prepend: true });
@@ -19,18 +19,18 @@ function app({ Component, pageProps }) {
 
   return (
     <CacheProvider value={emotionCache}>
-      <Head>
-        <title>AM NFT | HOME</title>
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-      </Head>
-      <DAppProvider config={{}}>
+      <WalletProvider>
+        <Head>
+          <title>AM NFT | HOME</title>
+          <link rel="icon" href="/favicon.ico" />
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+          <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+        </Head>
         <ThemeProvider theme={theme}>
           <CssBaseline />
           <Component {...pageProps} />
         </ThemeProvider>
-      </DAppProvider>
+      </WalletProvider>
     </CacheProvider>
   )
 }
