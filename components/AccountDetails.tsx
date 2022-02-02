@@ -8,8 +8,10 @@ import OpenNew from '@mui/icons-material/OpenInNew'
 import Button from '@mui/material/Button';
 import styled from '@emotion/styled'
 import JazzIcon from './JazzIcon'
-import { useEthers } from "@usedapp/core";
 import trimAccount from "helpers/trimAccount";
+import Web3Modal from 'web3modal'
+import { WalletContext } from 'context/WalletContext'
+import { useContext } from 'react';
 
 const AccountInfo = styled.div`
   border: 1px solid #bbb;
@@ -29,10 +31,13 @@ export default function AccountDetails({ open, handleClose }: {
   open: boolean, handleClose: () => void
 }) {
 
-  const { account, deactivate } = useEthers();
+  const { wallet } = useContext(WalletContext)
 
-  const handleDeactivate = () => {
-    deactivate();
+  const handleDeactivate = async () => {
+    const web3Modal = new Web3Modal()
+
+    web3Modal.clearCachedProvider()
+
     handleClose();
   }
 
@@ -80,7 +85,7 @@ export default function AccountDetails({ open, handleClose }: {
             </div>
 
             <span className="ml-4 text-2xl font-bold">
-              {trimAccount(account)}
+              {trimAccount(wallet?.address)}
             </span>
           </div>
 
