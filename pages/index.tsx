@@ -11,11 +11,7 @@ import { nftaddress, nftmarketaddress } from '../hardhat/config'
 import NFT from '../hardhat/artifacts/contracts/CreateNFT.sol/CreateNFT.json'
 import Market from '../hardhat/artifacts/contracts/Market.sol/NFTMarket.json'
 import Grid from '@mui/material/Grid'
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Button from '@mui/material/Button'
-
+import AdCard from 'components/AdCard'
 // let rpcEndpoint = 'https://rpc-mumbai.maticvigil.com'
 let rpcEndpoint = ''
 
@@ -90,21 +86,7 @@ export default function Home() {
         <Grid container spacing={2} style={{ padding: 36 }}>
           {
             nfts.map((nft, i) => (
-              <Grid item xs={3} key={i}>
-                <Card variant="outlined" style={{ width: '100%', paddingLeft: 16, paddingRight: 16, paddingTop: 16 }}>
-
-                  <CardContent>
-                    <img src={nft.image} width={'90%'} style={{ borderWidth: 1, borderColor: 'rgba(0, 0, 0, 0.2)', borderStyle: 'solid', padding: 16, borderRadius: 16, marginLeft: '5%' }} />
-                    <p style={{ fontSize: '22px', fontWeight: 'bold' }}>{nft.name}</p>
-                    <p>{nft.description}</p>
-                    <p style={{ fontSize: '24px', fontWeight: 'bold' }}>{nft.price} ETH</p>
-                  </CardContent>
-
-                  <CardActions>
-                    <Button onClick={() => buyNft(nft)} variant="contained" color="secondary" style={{ width: '100%' }}>Comprar</Button>
-                  </CardActions>
-                </Card>
-              </Grid>
+              <AdCard nft={nft} buyNft={buyNft} key={i} />
             ))
           }
         </Grid>
