@@ -10,6 +10,7 @@ import trimAccount from "helpers/trimAccount";
 import Web3Modal from 'web3modal'
 import { ethers, BigNumber } from "ethers";
 import { WalletContext } from 'context/WalletContext'
+import WalletConnectProvider from '@walletconnect/web3-provider'
 
 const AccountButton = styled(DefaultButton)`
   background-color: #000;
@@ -47,7 +48,18 @@ export default function WalletConn() {
   }, [wallet])
 
   async function handleConnectWallet() {
-    const web3Modal = new Web3Modal()
+    const web3Modal = new Web3Modal({
+      cacheProvider: true,
+      providerOptions: {
+        'wallet': {
+          package: WalletConnectProvider,
+          options: {
+            // Mikko's test key - don't copy as your mileage may vary
+            infuraId: "8043bb2cf99347b1bfadfb233c5325c0",
+          }
+        }
+      }
+    })
 
     const instance = await web3Modal.connect();
 
