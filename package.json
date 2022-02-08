@@ -23,6 +23,7 @@
     "ether": "^0.0.9",
     "ethereum-waffle": "^3.4.0",
     "ethers": "^5.5.4",
+    "formidable": "^2.0.1",
     "hardhat": "^2.8.3",
     "ipfs-http-client": "50.1.2",
     "next": "12.0.9",

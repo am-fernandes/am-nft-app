@@ -27,7 +27,7 @@ contract CreateNFT is ERC721URIStorage {
         _setTokenURI(newItemId, tokenURI);
 
         setApprovalForAll(contractAddress, true);
-
+        
         return newItemId;
     }
 }
