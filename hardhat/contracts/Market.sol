@@ -67,7 +67,6 @@ contract NFTMarket is ReentrancyGuard {
   /* Places an item for sale on the marketplace */
   // Pesquisar o que seria o tipo nonReentrant//
   // pesquisar sobre reentrant atack
-
   function createMarketItem(
     address nftContract,
     uint tokenId,
