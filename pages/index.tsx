@@ -42,6 +42,7 @@ export default function Home() {
         itemId: i.itemId.toNumber(),
         seller: i.seller,
         owner: i.owner,
+        creator: i.creator,
         image: meta.data.image,
         name: meta.data.name,
         description: meta.data.description,
