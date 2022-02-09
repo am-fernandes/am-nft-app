@@ -12,6 +12,7 @@ import trimAccount from "helpers/trimAccount";
 import Web3Modal from 'web3modal'
 import { WalletContext } from 'context/WalletContext'
 import { useContext } from 'react';
+import TextField from '@mui/material/TextField'
 
 const AccountInfo = styled.div`
   border: 1px solid #bbb;
@@ -54,7 +55,6 @@ export default function AccountDetails({ open, handleClose }: {
       <DialogTitle id="alert-dialog-title">
         {"Detalhes da conta"}
 
-
         <IconButton
           aria-label="close"
           onClick={handleClose}
@@ -70,18 +70,10 @@ export default function AccountDetails({ open, handleClose }: {
       </DialogTitle>
       <DialogContent>
         <AccountInfo>
-          <p>
-            Conectado com Metamask
-
-            <DisconnectButton color="error" onClick={handleDeactivate}>
-              Desconectar
-            </DisconnectButton>
-          </p>
 
           <div className="flex flex-row mt-6">
             <div className="mt-1">
               <JazzIcon />
-
             </div>
 
             <span className="ml-4 text-2xl font-bold">

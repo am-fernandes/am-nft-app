@@ -44,7 +44,7 @@ export default function Navbar() {
         <Toolbar className="flex">
           <Image alt='logo AM NFT' width={48} height={48} src={require("../public/img/logo.png")}></Image>
           <BrandTitle variant="h1">
-            AM NFT Marketplace
+            AM NFT
           </BrandTitle>
           <Spacer />
           <NavLink onClick={() => router.push("/")}>
@@ -55,6 +55,9 @@ export default function Navbar() {
           </NavLink>
           <NavLink onClick={() => router.push("/my-collection")}>
             📦 Sua coleção
+          </NavLink>
+          <NavLink onClick={() => router.push("/profile")}>
+            👤 Perfil
           </NavLink>
           <Spacer />
           <WalletConn />
