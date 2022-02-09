@@ -1,6 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import Container from '@mui/material/Container';
-import Navbar from 'components/Navbar'
 import { useState, useContext, useEffect } from 'react';
 import { ethers } from 'ethers'
 import { WalletContext } from 'context/WalletContext'
@@ -128,26 +126,23 @@ export default function CreateItem() {
   };
 
   return (
-    <Container className="p-4 mt-16">
-      <Navbar />
-      <Grid container spacing={10}>
-        <Grid item md={4}>
-          <label htmlFor="nftFile" className='block mb-4 font-bold text-lg text-black'>Faça o upload do arquivo PNG/JPG/GIF</label>
-          <input id="nftFile" type="file" accept="image/x-png,image/gif,image/jpeg" {...register('file', { required: true })} />
-          {imagePreview && (
-            <img alt="Imagem do NFT" src={imagePreview} className="my-4 bg-white border shadow" />
-          )}
-        </Grid>
-
-        <Grid item md={8}>
-          <InputEdit grid={12} name="name" control={control} label="Nome da arte" />
-          <InputEdit grid={12} name="price" control={control} label="Preço da arte em ETH" type="number" />
-          <InputEdit grid={12} control={control} label="Descrição da arte" multiline rows={3} name="description" />
-          <CreateNFTButton variant="contained" onClick={() => handleSubmit(onSubmit)()}>
-            Criar NFT
-          </CreateNFTButton>
-        </Grid>
+    <Grid container spacing={10}>
+      <Grid item md={4}>
+        <label htmlFor="nftFile" className='block mb-4 font-bold text-lg text-black'>Faça o upload do arquivo PNG/JPG/GIF</label>
+        <input id="nftFile" type="file" accept="image/x-png,image/gif,image/jpeg" {...register('file', { required: true })} />
+        {imagePreview && (
+          <img alt="Imagem do NFT" src={imagePreview} className="my-4 bg-white border shadow" />
+        )}
       </Grid>
-    </Container>
+
+      <Grid item md={8}>
+        <InputEdit grid={12} name="name" control={control} label="Nome da arte" />
+        <InputEdit grid={12} name="price" control={control} label="Preço da arte em ETH" type="number" />
+        <InputEdit grid={12} control={control} label="Descrição da arte" multiline rows={3} name="description" />
+        <CreateNFTButton variant="contained" onClick={() => handleSubmit(onSubmit)()}>
+          Criar NFT
+        </CreateNFTButton>
+      </Grid>
+    </Grid>
   )
 }

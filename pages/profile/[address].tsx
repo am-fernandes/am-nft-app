@@ -1,11 +1,8 @@
 import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import Container from '@mui/material/Container';
-import Navbar from 'components/Navbar'
 import Grid from '@mui/material/Grid'
 import axios from 'axios'
-import Web3Modal from "web3modal"
 import { nftmarketaddress, nftaddress } from '../../hardhat/config'
 
 import Market from '../../hardhat/artifacts/contracts/Market.sol/NFTMarket.json'
@@ -63,22 +60,19 @@ export default function Profile() {
   }, [address])
 
   return (
-    <Container className="p-4 mt-16">
-      <Navbar />
-      <Grid container spacing={2}>
-        <Grid item md={12}>
-          <div className="flex">
-            {
-              nfts.map((nft, i) => (
-                <div key={i} className="border shadow rounded-xl overflow-hidden m-4">
-                  <img src={nft.image} className="rounded" />
-                  {/* Valor pago - {nft.price} Eth */}
-                </div>
-              ))
-            }
-          </div>
-        </Grid>
+    <Grid container spacing={2}>
+      <Grid item md={12}>
+        <div className="flex">
+          {
+            nfts.map((nft, i) => (
+              <div key={i} className="border shadow rounded-xl overflow-hidden m-4">
+                <img src={nft.image} className="rounded" />
+                {/* Valor pago - {nft.price} Eth */}
+              </div>
+            ))
+          }
+        </div>
       </Grid>
-    </Container>
+    </Grid>
   )
 }

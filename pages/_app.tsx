@@ -5,6 +5,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { CacheProvider } from '@emotion/react';
 import createCache from '@emotion/cache';
 import { WalletProvider } from 'context/WalletContext'
+import Container from '@mui/material/Container';
+import Navbar from 'components/Navbar'
 
 function createEmotionCache() {
   return createCache({ key: 'css', prepend: true });
@@ -28,7 +30,11 @@ function app({ Component, pageProps }) {
         </Head>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <Component {...pageProps} />
+
+          <Container className="p-4 mt-16">
+            <Navbar />
+            <Component {...pageProps} />
+          </Container>
         </ThemeProvider>
       </WalletProvider>
     </CacheProvider>
