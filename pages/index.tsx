@@ -15,6 +15,7 @@ let rpcEndpoint = ''
 
 if (process.env.NEXT_PUBLIC_WORKSPACE_URL) {
   rpcEndpoint = process.env.NEXT_PUBLIC_WORKSPACE_URL
+  console.log('here')
 }
 
 export default function Home() {

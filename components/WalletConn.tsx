@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import { useState, useContext, useEffect } from "react";
 import { formatEther } from "@ethersproject/units";
 import Box from '@mui/material/Box';
@@ -6,11 +7,12 @@ import Wallet from '@mui/icons-material/AccountBalanceWalletOutlined'
 import styled from '@emotion/styled'
 import JazzIcon from './JazzIcon'
 import AccountDetails from "./AccountDetails";
-import trimAccount from "helpers/trimAccount";
+import trimAccount from "shared/helpers/trimAccount";
 import Web3Modal from 'web3modal'
 import { ethers, BigNumber } from "ethers";
 import { WalletContext } from 'context/WalletContext'
 import WalletConnectProvider from '@walletconnect/web3-provider'
+import useWallet from "hooks/useWallet";
 
 const AccountButton = styled(DefaultButton)`
   background-color: #000;
@@ -34,8 +36,7 @@ export default function WalletConn() {
   const [address, setAddress] = useState<string>('')
   const [balance, setBalance] = useState<BigNumber>()
 
-
-  const { editWallet, wallet } = useContext(WalletContext)
+  const { wallet } = useContext(WalletContext)
 
   useEffect(() => {
     if (wallet?.address) {
@@ -47,37 +48,14 @@ export default function WalletConn() {
     }
   }, [wallet])
 
+  const w = useWallet()
+
+
   async function handleConnectWallet() {
-    const web3Modal = new Web3Modal({
-      cacheProvider: true,
-      providerOptions: {
-        'wallet': {
-          package: WalletConnectProvider,
-          options: {
-            // Mikko's test key - don't copy as your mileage may vary
-            infuraId: "8043bb2cf99347b1bfadfb233c5325c0",
-          }
-        }
-      }
-    })
+    // const w = useWallet()
 
-    const instance = await web3Modal.connect();
-
-    const provider = new ethers.providers.Web3Provider(instance);
-    const signer = provider.getSigner();
-
-    const _address = await signer.getAddress()
-    const _balance = await signer.getBalance()
-
-    setAddress(_address)
-    setBalance(_balance)
-
-    editWallet({
-      provider,
-      signer,
-      address: _address,
-      balance: _balance
-    })
+    setAddress(w.address)
+    setBalance(w.balance)
   }
 
   const [open, setOpen] = useState(false);

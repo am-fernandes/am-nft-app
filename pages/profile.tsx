@@ -8,7 +8,7 @@ import { DefaultButton } from 'components/Button'
 import Typography from '@mui/material/Typography';
 import { TextField } from '@mui/material';
 import styled from '@emotion/styled'
-import ipfsUploader from 'helpers/ipfsUploader';
+import ipfsUploader from 'shared/helpers/ipfsUploader';
 
 const toBase64 = (file: File) => new Promise((resolve, reject) => {
   if (!file) return reject("NO FILE")

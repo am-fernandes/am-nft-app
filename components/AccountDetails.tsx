@@ -8,7 +8,7 @@ import OpenNew from '@mui/icons-material/OpenInNew'
 import Button from '@mui/material/Button';
 import styled from '@emotion/styled'
 import JazzIcon from './JazzIcon'
-import trimAccount from "helpers/trimAccount";
+import trimAccount from "shared/helpers/trimAccount";
 import Web3Modal from 'web3modal'
 import { WalletContext } from 'context/WalletContext'
 import { useContext } from 'react';

@@ -7,7 +7,7 @@ import { useForm } from 'react-hook-form';
 import { InputEdit } from 'components/Form/FormComponents'
 import { DefaultButton } from 'components/Button'
 import styled from '@emotion/styled';
-import ipfsUploader from 'helpers/ipfsUploader';
+import ipfsUploader from 'shared/helpers/ipfsUploader';
 
 const CreateNFTButton = styled(DefaultButton)`
   width: 50%;
