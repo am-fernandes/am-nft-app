@@ -8,6 +8,7 @@ import Grid from '@mui/material/Grid'
 import AdCard from 'components/AdCard'
 import useWallet from 'hooks/useWallet'
 import { marketContract, nftContract, nftaddress } from 'shared/contracts/instance'
+import Masonry from '@mui/lab/Masonry';
 
 export default function Home() {
   const { getConnection } = useWallet()
@@ -74,13 +75,16 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Grid container spacing={2} style={{ padding: 36 }}>
-        {
-          nfts.map((nft, i) => (
-            <AdCard nft={nft} buyNft={buyNft} key={i} />
-          ))
-        }
-      </Grid>
+      <div className='p-8'>
+        <Masonry columns={4} spacing={4} >
+          {
+            nfts.map((nft, i) => (
+              <AdCard nft={nft} buyNft={buyNft} key={i} />
+            ))
+          }
+        </Masonry>
+
+      </div>
     </>
   )
 }
