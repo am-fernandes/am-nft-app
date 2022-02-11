@@ -8,16 +8,8 @@ import styled from '@emotion/styled'
 import { DefaultButton } from 'components/Button'
 import { useEffect, useRef, useState } from 'react';
 import ColorThief from "colorthief";
-import Dialog from '@mui/material/Dialog';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import IconButton from '@mui/material/IconButton';
-import CloseIcon from '@mui/icons-material/Close';
-import CopyIcon from '@mui/icons-material/ContentCopy';
-import OpenNew from '@mui/icons-material/OpenInNew'
-import Button from '@mui/material/Button';
 import { TextField } from '@mui/material';
-
+import BaseModal from './BaseModal';
 
 const BuyButton = styled(DefaultButton)`
   width: 100%;
@@ -151,37 +143,10 @@ export default function AdCard({ nft, resale }: { nft: any, resale: (tokenId: st
         </CardActions>
       </NFTCard>
 
-      <Dialog
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-        PaperProps={{
-          style: { borderRadius: 16, width: '50%' }
-        }}
-      >
-        <DialogTitle id="alert-dialog-title">
-          {"Revender NFT"}
-
-          <IconButton
-            aria-label="close"
-            onClick={handleClose}
-            sx={{
-              position: 'absolute',
-              right: 8,
-              top: 8,
-              color: (theme) => theme.palette.grey[500],
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
-        <DialogContent>
-
-          <TextField variant="outlined" type="number" label="Digite o valor da revenda" required={true} sx={{ width: '100%', marginBottom: 3, marginTop: 1 }} onChange={(e) => setPrice(e.target.value)}></TextField>
-          <BuyButton variant="contained" type="submit" onClick={confirmResale} >Revender</BuyButton>
-        </DialogContent>
-      </Dialog>
+      <BaseModal open={open} handleClose={handleClose} title={"Revender NFT"}>
+        <TextField variant="outlined" type="number" label="Digite o valor da revenda" required={true} sx={{ width: '100%', marginBottom: 3, marginTop: 1 }} onChange={(e) => setPrice(e.target.value)}></TextField>
+        <BuyButton variant="contained" type="submit" onClick={confirmResale} >Revender</BuyButton>
+      </BaseModal>
     </>
   )
 }
