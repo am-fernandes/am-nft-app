@@ -10,6 +10,10 @@ interface WalletInfos {
   balance: BigNumber
 }
 
+interface UseWalletHook extends WalletInfos {
+  getConnection: () => Promise<WalletInfos>
+}
+
 const walletConnect = async (): Promise<WalletInfos> => {
   const web3Modal = new Web3Modal({
     cacheProvider: true
@@ -31,30 +35,48 @@ const walletConnect = async (): Promise<WalletInfos> => {
   }
 }
 
+const checkCachedProvider = (): Promise<WalletInfos> | undefined => {
+  const web3Modal = new Web3Modal({
+    cacheProvider: true
+  })
 
-const useWallet = (): WalletInfos => {
+  if (web3Modal.cachedProvider) {
+    return walletConnect()
+  }
+  return
+}
+
+const useWallet = (): UseWalletHook => {
   const [currentWallet, setCurrentWallet] = useState<WalletInfos>()
 
   const { wallet, editWallet } = useContext(WalletContext)
 
+  const getConnection = async (): Promise<WalletInfos> => {
+    if (wallet?.address && wallet?.balance && wallet?.provider && wallet?.signer) {
+      setCurrentWallet(wallet)
+
+      return { ...wallet }
+    }
+    const w = await walletConnect()
+
+    editWallet(w)
+    setCurrentWallet(w)
+
+    return w
+  }
+
   useEffect(() => {
     (async () => {
       if (wallet?.address && wallet?.balance && wallet?.provider && wallet?.signer) {
-        const { address, balance, provider, signer } = wallet
-
-        setCurrentWallet({
-          provider,
-          signer,
-          address,
-          balance
-        })
+        setCurrentWallet({ ...wallet })
       } else {
-        const w = await walletConnect()
+        const cachedWallet = await checkCachedProvider()
 
-        editWallet(w)
-        setCurrentWallet(w)
+        if (cachedWallet) {
+          editWallet(cachedWallet)
+          setCurrentWallet(cachedWallet)
+        }
       }
-
     })()
   }, [wallet, editWallet])
 
@@ -71,7 +93,7 @@ const useWallet = (): WalletInfos => {
     }
   }, [editWallet])
 
-  return currentWallet
+  return { getConnection, ...currentWallet }
 }
 
 export default useWallet

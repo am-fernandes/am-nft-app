@@ -33,29 +33,10 @@ function formatBalance(accountBalance?: BigNumber): string {
 }
 
 export default function WalletConn() {
-  const [address, setAddress] = useState<string>('')
-  const [balance, setBalance] = useState<BigNumber>()
-
-  const { wallet } = useContext(WalletContext)
-
-  useEffect(() => {
-    if (wallet?.address) {
-      setAddress(wallet.address)
-    }
-
-    if (wallet?.balance) {
-      setBalance(wallet.balance)
-    }
-  }, [wallet])
-
-  const w = useWallet()
-
+  const { address, balance, getConnection } = useWallet()
 
   async function handleConnectWallet() {
-    // const w = useWallet()
-
-    setAddress(w.address)
-    setBalance(w.balance)
+    await getConnection()
   }
 
   const [open, setOpen] = useState(false);
