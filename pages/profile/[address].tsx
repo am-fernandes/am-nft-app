@@ -3,10 +3,8 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import Grid from '@mui/material/Grid'
 import axios from 'axios'
-import { nftmarketaddress, nftaddress } from '../../hardhat/config'
+import { nftContract, marketContract } from 'shared/contracts/instance'
 import styled from '@emotion/styled'
-import Market from '../../hardhat/artifacts/contracts/Market.sol/NFTMarket.json'
-import NFT from '../../hardhat/artifacts/contracts/CreateNFT.sol/CreateNFT.json'
 import { Typography } from '@mui/material'
 import { Frame, ProfilePhoto } from 'pages/profile'
 
@@ -55,15 +53,13 @@ export default function Profile() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   async function loadNFTs() {
-    console.log('chamou')
     const provider = new ethers.providers.JsonRpcProvider(rpcEndpoint)
 
-    const marketContract = new ethers.Contract(nftmarketaddress, Market.abi, provider)
-    const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
-    const data = await marketContract.fetchCreatedByAddress(address)
+    const market = marketContract(provider)
+    const tokenContract = nftContract(provider)
+    const data = await market.fetchCreatedByAddress(address)
 
     const items = await Promise.all(data.map(async i => {
-      console.log('ta aqui')
       const tokenUri = await tokenContract.tokenURI(i.tokenId)
       const meta = await axios.get(tokenUri)
       let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
@@ -77,7 +73,6 @@ export default function Profile() {
       return item
     }))
 
-    console.log('items', items)
     setNfts(items)
   }
 

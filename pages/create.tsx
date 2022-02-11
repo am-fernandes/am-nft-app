@@ -8,6 +8,7 @@ import { DefaultButton } from 'components/Button'
 import styled from '@emotion/styled';
 import ipfsUploader from 'shared/helpers/ipfsUploader';
 import useWallet from 'hooks/useWallet';
+import { nftContract, nftaddress, marketContract } from 'shared/contracts/instance'
 
 const CreateNFTButton = styled(DefaultButton)`
   width: 50%;
@@ -17,21 +18,12 @@ const CreateNFTButton = styled(DefaultButton)`
     background: rgba(0, 0, 0, 0.85);
   }
 `
-
 interface NFTMetadata {
   description: string
   name: string
   price: string
   file: FileList
 }
-
-import {
-  nftaddress, nftmarketaddress
-} from '../hardhat/config'
-
-
-import NFT from '../hardhat/artifacts/contracts/CreateNFT.sol/CreateNFT.json'
-import Market from '../hardhat/artifacts/contracts/Market.sol/NFTMarket.json'
 
 const toBase64 = (file: File) => new Promise((resolve, reject) => {
   if (!file) return reject("NO FILE")
@@ -42,7 +34,7 @@ const toBase64 = (file: File) => new Promise((resolve, reject) => {
 });
 
 export default function CreateItem() {
-  const { signer } = useWallet()
+  const { getConnection } = useWallet()
 
   const { handleSubmit, control, register, watch } = useForm<NFTMetadata>({});
 
@@ -88,8 +80,9 @@ export default function CreateItem() {
 
   const mintNFT = async (metadataURL: string): Promise<any> => {
     if (!metadataURL) throw new Error('no metadata url')
-    // VERIFY WALLET SIGNER FROM CONTEXT
-    const contract = new ethers.Contract(nftaddress, NFT.abi, signer)
+    const { signer } = await getConnection()
+
+    const contract = nftContract(signer)
 
     const transaction = await contract.createToken(metadataURL)
     const tx = await transaction.wait()
@@ -103,9 +96,11 @@ export default function CreateItem() {
   const listToMarket = async (tokenId: string, price: string) => {
     if (!tokenId || !price) throw new Error('no token id or pricing');
 
+    const { signer } = await getConnection()
+
     const mktPrice = ethers.utils.parseUnits(price, 'ether')
 
-    const contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
+    const contract = marketContract(signer)
     const transaction = await contract.createMarketItem(nftaddress, tokenId, mktPrice)
     const tx = await transaction.wait()
 

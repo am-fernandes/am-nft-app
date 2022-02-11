@@ -1,16 +1,16 @@
 import { ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-import { nftmarketaddress, nftaddress } from '../hardhat/config'
-import Market from '../hardhat/artifacts/contracts/Market.sol/NFTMarket.json'
-import NFT from '../hardhat/artifacts/contracts/CreateNFT.sol/CreateNFT.json'
 import useWallet from 'hooks/useWallet'
+import { marketContract, nftContract, nftaddress, nftmarketaddress } from 'shared/contracts/instance'
 
 export default function MyAssets() {
-  const { signer, provider } = useWallet()
+  const { getConnection } = useWallet()
 
   const approveHandle = async (tokenId: string) => {
-    const contract = new ethers.Contract(nftaddress, NFT.abi, signer)
+    const { signer } = await getConnection()
+
+    const contract = nftContract(signer)
 
     const transaction = await contract.approveNFTHandle(nftmarketaddress, tokenId)
     const tx = await transaction.wait()
@@ -23,11 +23,13 @@ export default function MyAssets() {
   const listToMarket = async (tokenId: string, price: string = '7000') => {
     if (!tokenId || !price) throw new Error('no token id or pricing');
 
+    const { signer } = await getConnection()
+
     await approveHandle(tokenId)
 
     const mktPrice = ethers.utils.parseUnits('7000', 'ether')
 
-    const contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
+    const contract = marketContract(signer)
     const transaction = await contract.createMarketItem(nftaddress, tokenId, mktPrice)
     const tx = await transaction.wait()
 
@@ -39,17 +41,21 @@ export default function MyAssets() {
   const [nfts, setNfts] = useState([])
 
   useEffect(() => {
-    if (signer && provider) {
-      loadNFTs()
-    }
-  }, [signer, provider])
+    (async () => {
+      const { signer, provider } = await getConnection()
+
+      if (signer && provider) {
+        loadNFTs()
+      }
+    })()
+  }, [])
 
   async function loadNFTs() {
-    console.log()
+    const { signer, provider } = await getConnection()
 
-    const marketContract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
-    const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
-    const data = await marketContract.fetchMyNFTs()
+    const market = marketContract(signer)
+    const tokenContract = nftContract(provider)
+    const data = await market.fetchMyNFTs()
 
     const items = await Promise.all(data.map(async i => {
       const tokenUri = await tokenContract.tokenURI(i.tokenId)

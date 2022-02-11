@@ -4,19 +4,10 @@ import Head from 'next/head'
 import axios from 'axios'
 import { ethers } from 'ethers'
 import { useState, useEffect } from 'react'
-import { nftaddress, nftmarketaddress } from '../hardhat/config'
-import NFT from '../hardhat/artifacts/contracts/CreateNFT.sol/CreateNFT.json'
-import Market from '../hardhat/artifacts/contracts/Market.sol/NFTMarket.json'
 import Grid from '@mui/material/Grid'
 import AdCard from 'components/AdCard'
 import useWallet from 'hooks/useWallet'
-
-let rpcEndpoint = ''
-
-if (process.env.NEXT_PUBLIC_WORKSPACE_URL) {
-  rpcEndpoint = process.env.NEXT_PUBLIC_WORKSPACE_URL
-  console.log('here')
-}
+import { marketContract, nftContract, nftaddress } from 'shared/contracts/instance'
 
 export default function Home() {
   const { getConnection } = useWallet()
@@ -31,12 +22,14 @@ export default function Home() {
   async function loadNFTs() {
     const { provider } = await getConnection()
 
-    const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
-    const marketContract = new ethers.Contract(nftmarketaddress, Market.abi, provider)
-    const data = await marketContract.fetchMarketItems()
+    const market = marketContract(provider)
+    const nft = nftContract(provider)
+
+
+    const data = await market.fetchMarketItems()
 
     const items = await Promise.all(data.map(async i => {
-      const tokenUri = await tokenContract.tokenURI(i.tokenId)
+      const tokenUri = await nft.tokenURI(i.tokenId)
       const meta = await axios.get(tokenUri)
       let price = ethers.utils.formatUnits(i.price.toString(), 'ether')
       let item = {
@@ -57,7 +50,7 @@ export default function Home() {
   async function buyNft(nft) {
     const { signer } = await getConnection()
 
-    const contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
+    const contract = marketContract(signer)
 
     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether')
     const transaction = await contract.createMarketSale(nftaddress, nft.itemId, {
