@@ -2,7 +2,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Head from 'next/head'
 import axios from 'axios'
-import Web3Modal from "web3modal"
 import { ethers } from 'ethers'
 import { useState, useEffect } from 'react'
 import { nftaddress, nftmarketaddress } from '../hardhat/config'
@@ -10,7 +9,8 @@ import NFT from '../hardhat/artifacts/contracts/CreateNFT.sol/CreateNFT.json'
 import Market from '../hardhat/artifacts/contracts/Market.sol/NFTMarket.json'
 import Grid from '@mui/material/Grid'
 import AdCard from 'components/AdCard'
-// let rpcEndpoint = 'https://rpc-mumbai.maticvigil.com'
+import useWallet from 'hooks/useWallet'
+
 let rpcEndpoint = ''
 
 if (process.env.NEXT_PUBLIC_WORKSPACE_URL) {
@@ -19,6 +19,8 @@ if (process.env.NEXT_PUBLIC_WORKSPACE_URL) {
 }
 
 export default function Home() {
+  const { getConnection } = useWallet()
+
   const [nfts, setNfts] = useState([])
   const [loadingState, setLoadingState] = useState('not-loaded')
 
@@ -27,7 +29,8 @@ export default function Home() {
   }, [])
 
   async function loadNFTs() {
-    const provider = new ethers.providers.JsonRpcProvider(rpcEndpoint)
+    const { provider } = await getConnection()
+
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)
     const marketContract = new ethers.Contract(nftmarketaddress, Market.abi, provider)
     const data = await marketContract.fetchMarketItems()
@@ -52,17 +55,17 @@ export default function Home() {
     setLoadingState('loaded')
   }
   async function buyNft(nft) {
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
+    const { signer } = await getConnection()
+
     const contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
 
     const price = ethers.utils.parseUnits(nft.price.toString(), 'ether')
     const transaction = await contract.createMarketSale(nftaddress, nft.itemId, {
       value: price
     })
+
     await transaction.wait()
+
     loadNFTs()
   }
 

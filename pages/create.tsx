@@ -1,13 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
-import { useState, useContext, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ethers } from 'ethers'
-import { WalletContext } from 'context/WalletContext'
 import Grid from '@mui/material/Grid'
 import { useForm } from 'react-hook-form';
 import { InputEdit } from 'components/Form/FormComponents'
 import { DefaultButton } from 'components/Button'
 import styled from '@emotion/styled';
 import ipfsUploader from 'shared/helpers/ipfsUploader';
+import useWallet from 'hooks/useWallet';
 
 const CreateNFTButton = styled(DefaultButton)`
   width: 50%;
@@ -42,8 +42,9 @@ const toBase64 = (file: File) => new Promise((resolve, reject) => {
 });
 
 export default function CreateItem() {
+  const { signer } = useWallet()
+
   const { handleSubmit, control, register, watch } = useForm<NFTMetadata>({});
-  const { wallet } = useContext(WalletContext)
 
   const [imagePreview, setImagePreview] = useState<string>()
 
@@ -88,7 +89,7 @@ export default function CreateItem() {
   const mintNFT = async (metadataURL: string): Promise<any> => {
     if (!metadataURL) throw new Error('no metadata url')
     // VERIFY WALLET SIGNER FROM CONTEXT
-    const contract = new ethers.Contract(nftaddress, NFT.abi, wallet.signer)
+    const contract = new ethers.Contract(nftaddress, NFT.abi, signer)
 
     const transaction = await contract.createToken(metadataURL)
     const tx = await transaction.wait()
@@ -104,7 +105,7 @@ export default function CreateItem() {
 
     const mktPrice = ethers.utils.parseUnits(price, 'ether')
 
-    const contract = new ethers.Contract(nftmarketaddress, Market.abi, wallet.signer)
+    const contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
     const transaction = await contract.createMarketItem(nftaddress, tokenId, mktPrice)
     const tx = await transaction.wait()
 

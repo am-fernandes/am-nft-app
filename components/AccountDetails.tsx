@@ -10,9 +10,7 @@ import styled from '@emotion/styled'
 import JazzIcon from './JazzIcon'
 import trimAccount from "shared/helpers/trimAccount";
 import Web3Modal from 'web3modal'
-import { WalletContext } from 'context/WalletContext'
-import { useContext } from 'react';
-import TextField from '@mui/material/TextField'
+import useWallet from 'hooks/useWallet'
 
 const AccountInfo = styled.div`
   border: 1px solid #bbb;
@@ -32,7 +30,9 @@ export default function AccountDetails({ open, handleClose }: {
   open: boolean, handleClose: () => void
 }) {
 
-  const { wallet } = useContext(WalletContext)
+
+
+  const { address, provider } = useWallet()
 
   const handleDeactivate = async () => {
     const web3Modal = new Web3Modal()
@@ -77,7 +77,7 @@ export default function AccountDetails({ open, handleClose }: {
             </div>
 
             <span className="ml-4 text-2xl font-bold">
-              {trimAccount(wallet?.address)}
+              {trimAccount(address)}
             </span>
           </div>
 

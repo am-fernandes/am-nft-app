@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks */
-import { useState, useContext, useEffect } from "react";
+import { useState } from "react";
 import { formatEther } from "@ethersproject/units";
 import Box from '@mui/material/Box';
 import { DefaultButton } from 'components/Button';
@@ -8,10 +7,7 @@ import styled from '@emotion/styled'
 import JazzIcon from './JazzIcon'
 import AccountDetails from "./AccountDetails";
 import trimAccount from "shared/helpers/trimAccount";
-import Web3Modal from 'web3modal'
-import { ethers, BigNumber } from "ethers";
-import { WalletContext } from 'context/WalletContext'
-import WalletConnectProvider from '@walletconnect/web3-provider'
+import { BigNumber } from "ethers";
 import useWallet from "hooks/useWallet";
 
 const AccountButton = styled(DefaultButton)`

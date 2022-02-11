@@ -1,17 +1,16 @@
 import { ethers } from 'ethers'
-import { useEffect, useState, useContext } from 'react'
+import { useEffect, useState } from 'react'
 import axios from 'axios'
-import Web3Modal from "web3modal"
 import { nftmarketaddress, nftaddress } from '../hardhat/config'
 import Market from '../hardhat/artifacts/contracts/Market.sol/NFTMarket.json'
 import NFT from '../hardhat/artifacts/contracts/CreateNFT.sol/CreateNFT.json'
-import { WalletContext } from 'context/WalletContext'
+import useWallet from 'hooks/useWallet'
 
 export default function MyAssets() {
-  const { wallet } = useContext(WalletContext)
+  const { signer, provider } = useWallet()
 
   const approveHandle = async (tokenId: string) => {
-    const contract = new ethers.Contract(nftaddress, NFT.abi, wallet.signer)
+    const contract = new ethers.Contract(nftaddress, NFT.abi, signer)
 
     const transaction = await contract.approveNFTHandle(nftmarketaddress, tokenId)
     const tx = await transaction.wait()
@@ -28,7 +27,7 @@ export default function MyAssets() {
 
     const mktPrice = ethers.utils.parseUnits('7000', 'ether')
 
-    const contract = new ethers.Contract(nftmarketaddress, Market.abi, wallet.signer)
+    const contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
     const transaction = await contract.createMarketItem(nftaddress, tokenId, mktPrice)
     const tx = await transaction.wait()
 
@@ -40,17 +39,13 @@ export default function MyAssets() {
   const [nfts, setNfts] = useState([])
 
   useEffect(() => {
-    loadNFTs()
-  }, [])
+    if (signer && provider) {
+      loadNFTs()
+    }
+  }, [signer, provider])
 
   async function loadNFTs() {
-    const web3Modal = new Web3Modal({
-      // network: "mainnet",
-      // cacheProvider: true,
-    })
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
+    console.log()
 
     const marketContract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider)

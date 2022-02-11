@@ -1,6 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { useState, useContext, useEffect } from 'react';
-import { WalletContext } from 'context/WalletContext'
+import { useState, useEffect } from 'react';
 import Grid from '@mui/material/Grid'
 import { useForm } from 'react-hook-form';
 import { InputEdit } from 'components/Form/FormComponents'
@@ -9,6 +8,7 @@ import Typography from '@mui/material/Typography';
 import { TextField } from '@mui/material';
 import styled from '@emotion/styled'
 import ipfsUploader from 'shared/helpers/ipfsUploader';
+import useWallet from 'hooks/useWallet';
 
 const toBase64 = (file: File) => new Promise((resolve, reject) => {
   if (!file) return reject("NO FILE")
@@ -58,8 +58,9 @@ const imageUpload = async (files: FileList): Promise<string> => {
 
 
 export default function Profile() {
+  const { address } = useWallet()
+
   const { handleSubmit, control, register, watch } = useForm<Profile>({});
-  const { wallet } = useContext(WalletContext)
 
   const [imagePreview, setImagePreview] = useState<string>()
 
@@ -96,7 +97,7 @@ export default function Profile() {
         email,
         username,
         bio,
-        wallet: wallet.address,
+        wallet: address,
         photo: photoURL
       })
     })
@@ -127,7 +128,7 @@ export default function Profile() {
         </Grid>
 
         <Grid item md={8}>
-          <TextField className="w-full" label="Endereço da carteira" disabled value={wallet?.address} />
+          <TextField className="w-full" label="Endereço da carteira" disabled value={address} />
           <InputEdit grid={12} name="username" control={control} label="Username" />
           <InputEdit grid={12} name="email" control={control} label="Email" type="email" />
           <InputEdit grid={12} control={control} label="Biografia" multiline rows={3} name="bio" />
