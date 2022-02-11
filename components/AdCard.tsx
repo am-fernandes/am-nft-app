@@ -8,7 +8,6 @@ import styled from '@emotion/styled'
 import { DefaultButton } from 'components/Button'
 import { useEffect, useRef, useState } from 'react';
 import ColorThief from "colorthief";
-import CardMedia from '@mui/material/CardMedia';
 
 const BuyButton = styled(DefaultButton)`
   width: 100%;
@@ -79,31 +78,34 @@ export default function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) =
 
   useEffect(() => {
     if (imgRef?.current && (imgRef?.current.width || imgRef?.current.offsetWidth)) {
-      const colorThief = new ColorThief();
+      try {
+        const colorThief = new ColorThief();
 
-      const prominentColor = colorThief.getColor(imgRef?.current, 25)
+        const prominentColor = colorThief.getColor(imgRef?.current, 25)
 
-      setColor(`rgba(${prominentColor.join()}, 0.35)`)
+        setColor(`rgba(${prominentColor.join()}, 0.35)`)
+      }
+      catch (e) {
+        console.error(e)
+      }
     }
   }, [imgRef])
 
   return (
-    <Grid item xs={3}>
-      <NFTCard variant='outlined' className="shadow" color={color}>
-        <ImgContainer>
-          <NFTImage crossOrigin={"anonymous"} src={nft.image} ref={imgRef} loading="lazy" />
-        </ImgContainer>
+    <NFTCard variant='outlined' className="shadow" color={color}>
+      <ImgContainer>
+        <NFTImage crossOrigin={"anonymous"} src={nft.image} ref={imgRef} loading="lazy" />
+      </ImgContainer>
 
-        <CardContent>
-          <NFTTitle>{nft.name}</NFTTitle>
-          <NFTDescription>{nft.description}</NFTDescription>
-          <NFTPrice style={{ fontSize: '24px' }}>{nft.price} ETH</NFTPrice>
-        </CardContent>
+      <CardContent>
+        <NFTTitle>{nft.name}</NFTTitle>
+        <NFTDescription>{nft.description}</NFTDescription>
+        <NFTPrice style={{ fontSize: '24px' }}>{nft.price} ETH</NFTPrice>
+      </CardContent>
 
-        <CardActions>
-          <BuyButton onClick={() => buyNft(nft)} variant="contained">Comprar</BuyButton>
-        </CardActions>
-      </NFTCard>
-    </Grid>
+      <CardActions>
+        <BuyButton onClick={() => buyNft(nft)} variant="contained">Comprar</BuyButton>
+      </CardActions>
+    </NFTCard>
   )
 }

@@ -4,7 +4,6 @@ import Head from 'next/head'
 import axios from 'axios'
 import { ethers } from 'ethers'
 import { useState, useEffect } from 'react'
-import Grid from '@mui/material/Grid'
 import AdCard from 'components/AdCard'
 import useWallet from 'hooks/useWallet'
 import { marketContract, nftContract, nftaddress } from 'shared/contracts/instance'
@@ -75,16 +74,13 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className='p-8'>
-        <Masonry columns={4} spacing={4} >
-          {
-            nfts.map((nft, i) => (
-              <AdCard nft={nft} buyNft={buyNft} key={i} />
-            ))
-          }
-        </Masonry>
-
-      </div>
+      <Masonry columns={4} spacing={4} >
+        {
+          nfts.map((nft, i) => (
+            <AdCard nft={nft} buyNft={buyNft} key={i} />
+          ))
+        }
+      </Masonry>
     </>
   )
 }
