@@ -152,7 +152,7 @@ export default function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) =
       <CardContent>
         <NFTTitle>{nft.name}</NFTTitle>
         <CreatorPopup className="shadow" onClick={() => router.push(`profile/${nft.creator}`)}>
-          Artista: {artist}
+          Artista: @{artist}
         </CreatorPopup>
         <NFTDescription>{nft.description}</NFTDescription>
         <NFTPrice style={{ fontSize: '24px' }}>{nft.price} ETH</NFTPrice>

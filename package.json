@@ -29,11 +29,13 @@
     "ethers": "^5.5.4",
     "formidable": "^2.0.1",
     "hardhat": "^2.8.3",
+    "ioredis": "^4.28.5",
     "ipfs-http-client": "50.1.2",
     "next": "12.0.9",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "react-hook-form": "^7.26.0",
+    "redis": "^4.0.3",
     "walletlink": "^2.4.6",
     "web3modal": "^1.9.5"
   },
