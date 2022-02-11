@@ -9,6 +9,7 @@ import styled from '@emotion/styled';
 import ipfsUploader from 'shared/helpers/ipfsUploader';
 import useWallet from 'hooks/useWallet';
 import { nftContract, nftaddress, marketContract } from 'shared/contracts/instance'
+import { useRouter } from 'next/router';
 
 const CreateNFTButton = styled(DefaultButton)`
   width: 50%;
@@ -34,6 +35,8 @@ const toBase64 = (file: File) => new Promise((resolve, reject) => {
 });
 
 export default function CreateItem() {
+  const router = useRouter()
+
   const { getConnection } = useWallet()
 
   const { handleSubmit, control, register, watch } = useForm<NFTMetadata>({});
@@ -107,8 +110,11 @@ export default function CreateItem() {
     const event = tx.events[0]
 
     console.log(event)
-  }
 
+    alert('Seu NFT foi criado com sucesso!')
+
+    router.push('/')
+  }
 
   const onSubmit = async ({ file, description, name, price }: NFTMetadata) => {
     if (!file.length) throw new Error("no file");

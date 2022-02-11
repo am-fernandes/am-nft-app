@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import ColorThief from "colorthief";
 import trimAccount from 'shared/helpers/trimAccount'
 
+
 const BuyButton = styled(DefaultButton)`
   width: 100%;
   border-radius: 32px;
@@ -73,7 +74,7 @@ const NFTDescription = styled.p`
   margin-bottom: 0.5rem;
 `
 
-const CreatorPopup = styled.span`
+const CreatorPopup = styled.div`
   background: #fff;
   color: #000;
   font-weight: bold;
@@ -81,6 +82,7 @@ const CreatorPopup = styled.span`
   border-radius: 1rem;
   width: 80%;
   margin: 0.5rem 10%;
+  text-align: center;
   &:hover {
     cursor: pointer;
     transition: all 300ms linear;
@@ -88,13 +90,42 @@ const CreatorPopup = styled.span`
   }
 `
 
+const getArtist = async (address: string): Promise<string> => {
+  if (!address) return ''
+
+  const p = new Promise<any>((resolve, reject) => {
+    fetch(`http://localhost:3000/api/user/select/wallet/${address}`, {
+      "method": "GET",
+      "headers": {}
+    })
+      .then(response => response.json())
+      .then((response) => resolve(response))
+      .catch(err => {
+        reject(err);
+      });
+  })
+
+  const account = await p
+
+  if (account?.length) {
+    return account[0]?.username
+  }
+
+  return trimAccount(address)
+}
+
 export default function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
   const router = useRouter()
 
   const [color, setColor] = useState("#fff")
+  const [artist, setArtist] = useState()
   const imgRef = useRef(null)
 
-  console.log(nft)
+  useEffect(() => {
+    getArtist(nft?.creator)
+      .then((r) => setArtist(r))
+      .catch((e) => console.log(e))
+  }, [nft])
 
   useEffect(() => {
     if (imgRef?.current && (imgRef?.current.width || imgRef?.current.offsetWidth)) {
@@ -121,7 +152,7 @@ export default function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) =
       <CardContent>
         <NFTTitle>{nft.name}</NFTTitle>
         <CreatorPopup className="shadow" onClick={() => router.push(`profile/${nft.creator}`)}>
-          Artista: {trimAccount(nft?.creator)}
+          Artista: {artist}
         </CreatorPopup>
         <NFTDescription>{nft.description}</NFTDescription>
         <NFTPrice style={{ fontSize: '24px' }}>{nft.price} ETH</NFTPrice>
