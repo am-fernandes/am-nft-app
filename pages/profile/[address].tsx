@@ -7,6 +7,8 @@ import { nftContract, marketContract } from 'shared/contracts/instance'
 import styled from '@emotion/styled'
 import { Typography } from '@mui/material'
 import { Frame, ProfilePhoto } from 'pages/profile'
+import Masonry from '@mui/lab/Masonry';
+import GalleryCard from 'components/GalleryCard'
 
 let rpcEndpoint = ''
 
@@ -69,6 +71,8 @@ export default function Profile() {
         seller: i.seller,
         owner: i.owner,
         image: meta.data.image,
+        name: meta.data.name,
+        description: meta.data.description,
       }
       return item
     }))
@@ -108,21 +112,13 @@ export default function Profile() {
         <p className="text-center mt-4">{artist?.bio}</p>
       </Banner>
 
-      <Grid container spacing={2}>
-
-        <Grid item md={12}>
-          <div className="flex">
-            {
-              nfts.map((nft, i) => (
-                <div key={i} className="border shadow rounded-xl overflow-hidden m-4">
-                  <img src={nft.image} className="rounded" />
-                  {/* Valor pago - {nft.price} Eth */}
-                </div>
-              ))
-            }
-          </div>
-        </Grid>
-      </Grid>
+      <Masonry columns={4} spacing={4} >
+        {
+          nfts?.map((nft, i) => (
+            <GalleryCard nft={nft} key={i} />
+          ))
+        }
+      </Masonry>
     </>
   )
 }

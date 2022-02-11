@@ -6,7 +6,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import styled from '@emotion/styled'
 import { DefaultButton } from 'components/Button'
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ColorThief from "colorthief";
 import { TextField } from '@mui/material';
 import BaseModal from './BaseModal';
@@ -91,7 +91,7 @@ const CreatorPopup = styled.span`
   }
 `
 
-export default function AdCard({ nft, resale }: { nft: any, resale: (tokenId: string, price: string) => void }) {
+function ResaleCard({ nft, resale }: { nft: any, resale: (tokenId: string, price: string) => void }) {
   const [color, setColor] = useState("#fff")
   const imgRef = useRef(null)
 
@@ -171,3 +171,5 @@ export default function AdCard({ nft, resale }: { nft: any, resale: (tokenId: st
     </>
   )
 }
+
+export default React.memo(ResaleCard)

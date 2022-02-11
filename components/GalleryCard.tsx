@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import { useRouter } from 'next/router'
+import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -8,8 +8,10 @@ import styled from '@emotion/styled'
 import { DefaultButton } from 'components/Button'
 import React, { useEffect, useRef, useState } from 'react';
 import ColorThief from "colorthief";
+import { TextField } from '@mui/material';
+import BaseModal from './BaseModal';
 import trimAccount from 'shared/helpers/trimAccount'
-
+import { useRouter } from 'next/router'
 
 const BuyButton = styled(DefaultButton)`
   width: 100%;
@@ -74,7 +76,7 @@ const NFTDescription = styled.p`
   margin-bottom: 0.5rem;
 `
 
-const CreatorPopup = styled.div`
+const CreatorPopup = styled.span`
   background: #fff;
   color: #000;
   font-weight: bold;
@@ -82,7 +84,6 @@ const CreatorPopup = styled.div`
   border-radius: 1rem;
   width: 80%;
   margin: 0.5rem 10%;
-  text-align: center;
   &:hover {
     cursor: pointer;
     transition: all 300ms linear;
@@ -90,42 +91,25 @@ const CreatorPopup = styled.div`
   }
 `
 
-const getArtist = async (address: string): Promise<string> => {
-  if (!address) return ''
-
-  const p = new Promise<any>((resolve, reject) => {
-    fetch(`http://localhost:3000/api/user/select/wallet/${address}`, {
-      "method": "GET",
-      "headers": {}
-    })
-      .then(response => response.json())
-      .then((response) => resolve(response))
-      .catch(err => {
-        reject(err);
-      });
-  })
-
-  const account = await p
-
-  if (account?.length) {
-    return account[0]?.username
-  }
-
-  return trimAccount(address)
-}
-
-function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
-  const router = useRouter()
-
+function ResaleCard({ nft }: { nft: any }) {
   const [color, setColor] = useState("#fff")
-  const [artist, setArtist] = useState()
   const imgRef = useRef(null)
 
-  useEffect(() => {
-    getArtist(nft?.creator)
-      .then((r) => setArtist(r))
-      .catch((e) => console.log(e))
-  }, [nft])
+  const [open, setOpen] = useState(false);
+  const [price, setPrice] = useState<string>('');
+
+  const [tokenToSale, setTokenToSale] = useState<string>('');
+
+  const router = useRouter()
+
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     if (imgRef?.current && (imgRef?.current.width || imgRef?.current.offsetWidth)) {
@@ -142,28 +126,38 @@ function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
     }
   }, [imgRef])
 
+  const resaleHandle = (tokenId: string) => {
+    // resale( tokenId, '8000')
+    setTokenToSale(tokenId)
+
+    handleClickOpen()
+  }
+
+
+  const confirmResale = () => {
+    if (price) {
+      resale(tokenToSale, price)
+      handleClose()
+    } else {
+      alert('Defina um preço!')
+    }
+  }
+
   return (
-    <NFTCard variant='outlined' className="shadow" color={color}>
+    <>
+      <NFTCard variant='outlined' className="shadow" color={color}>
+        <ImgContainer>
+          <NFTImage crossOrigin={"anonymous"} src={nft.image} ref={imgRef} loading="lazy" />
+        </ImgContainer>
 
-      <ImgContainer>
-        <NFTImage crossOrigin={"anonymous"} src={nft.image} ref={imgRef} loading="lazy" />
-      </ImgContainer>
+        <CardContent>
+          <NFTTitle>{nft.name}</NFTTitle>
 
-      <CardContent>
-        <NFTTitle>{nft.name}</NFTTitle>
-        <CreatorPopup className="shadow" onClick={() => router.push(`profile/${nft.creator}`)}>
-          Artista: @{artist}
-        </CreatorPopup>
-        <NFTDescription>{nft.description}</NFTDescription>
-        <NFTPrice style={{ fontSize: '24px' }}>{nft.price} ETH</NFTPrice>
-      </CardContent>
-
-      <CardActions>
-        <BuyButton onClick={() => buyNft(nft)} variant="contained">Comprar</BuyButton>
-      </CardActions>
-    </NFTCard>
+          <NFTDescription>{nft.description}</NFTDescription>
+        </CardContent>
+      </NFTCard>
+    </>
   )
 }
 
-
-export default React.memo(AdCard)
+export default React.memo(ResaleCard)

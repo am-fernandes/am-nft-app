@@ -6,6 +6,14 @@ import Redis from 'ioredis'
 
 dotenv.config();
 
+
+const redis = new Redis({
+  host: process.env.REDIS_HOST,
+  port: process.env.REDIS_PORT,
+  password: process.env.REDIS_PASSWORD,
+})
+
+
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   return new Promise<void>(async (resolve) => {
     if (req.method !== 'GET') {
@@ -19,12 +27,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       res.status(500).send('no data')
       return resolve()
     }
-
-    const redis = new Redis({
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT,
-      password: process.env.REDIS_PASSWORD,
-    })
 
     //@ts-ignore
     const value = await redis.get(wallet)
@@ -52,8 +54,6 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     // //@ts-ignore
     await redis.set(wallet, JSON.stringify(data));
     // await client.disconnect()
-
-    await redis.disconnect();
 
     return res.status(200).send(data)
   })

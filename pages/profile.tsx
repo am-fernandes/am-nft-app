@@ -64,6 +64,9 @@ export default function Profile() {
 
   const [imagePreview, setImagePreview] = useState<string>()
 
+  const [user, setUser] = useState<any>()
+
+
   const watchNFTFile = watch('file')
 
   useEffect(() => {
@@ -80,6 +83,28 @@ export default function Profile() {
       }
     }
   }, [watchNFTFile])
+
+  useEffect(() => {
+    if (address) {
+      const p = new Promise<any>((resolve, reject) => {
+        fetch(`http://localhost:3000/api/user/select/wallet/${address}`, {
+          "method": "GET",
+          "headers": {}
+        })
+          .then(response => response.json())
+          .then((response) => resolve(response))
+          .catch(err => {
+            reject(err);
+          });
+      })
+
+      p.then((res) => {
+        setUser(res[0])
+        console.log(res)
+      })
+
+    }
+  }, [address])
 
 
 
@@ -115,28 +140,54 @@ export default function Profile() {
     <>
       <Typography variant='h3' component="h1" className="text-center mb-4">Edite seu perfil</Typography>
 
-      <Grid container spacing={10}>
-        <Grid item md={4}>
-          <label htmlFor="nftFile" className='block mb-4 font-bold text-lg text-black'>Faça o upload do arquivo PNG/JPG/GIF</label>
-          <input id="nftFile" type="file" accept="image/x-png,image/gif,image/jpeg" {...register('file', { required: true })} />
-          <Frame>
-            {imagePreview && (
-              <ProfilePhoto className="border shadow" alt="Imagem do NFT" src={imagePreview} />
-            )}
-          </Frame>
+      {!user ? (
+        <Grid container spacing={10}>
+          <Grid item md={4}>
+            <label htmlFor="nftFile" className='block mb-4 font-bold text-lg text-black'>Faça o upload do arquivo PNG/JPG/GIF</label>
+            <input id="nftFile" type="file" accept="image/x-png,image/gif,image/jpeg" {...register('file', { required: true })} />
+            <Frame>
+              {imagePreview && (
+                <ProfilePhoto className="border shadow" alt="Imagem do NFT" src={imagePreview} />
+              )}
+            </Frame>
 
-        </Grid>
+          </Grid>
 
-        <Grid item md={8}>
-          <TextField className="w-full" label="Endereço da carteira" disabled value={address} />
-          <InputEdit grid={12} name="username" control={control} label="Username" />
-          <InputEdit grid={12} name="email" control={control} label="Email" type="email" />
-          <InputEdit grid={12} control={control} label="Biografia" multiline rows={3} name="bio" />
-          <DefaultButton variant="contained" onClick={() => handleSubmit(onSubmit)()}>
-            Salvar perfil
-          </DefaultButton>
-        </Grid>
-      </Grid>
+          <Grid item md={8}>
+            <TextField className="w-full" label="Endereço da carteira" disabled value={address} />
+            <InputEdit grid={12} name="username" control={control} label="Username" />
+            <InputEdit grid={12} name="email" control={control} label="Email" type="email" />
+            <InputEdit grid={12} control={control} label="Biografia" multiline rows={3} name="bio" />
+            <DefaultButton variant="contained" onClick={() => handleSubmit(onSubmit)()}>
+              Salvar perfil
+            </DefaultButton>
+          </Grid>
+        </Grid>) :
+        (
+
+          <Grid container spacing={10}>
+            <Grid item md={4}>
+              <label htmlFor="nftFile" className='block mb-4 font-bold text-lg text-black'>Faça o upload do arquivo PNG/JPG/GIF</label>
+              <input id="nftFile" type="file" accept="image/x-png,image/gif,image/jpeg" {...register('file', { required: true })} />
+              <Frame>
+                {user?.photo && (
+                  <ProfilePhoto className="border shadow" alt="Imagem do NFT" src={user?.photo} />
+                )}
+              </Frame>
+
+            </Grid>
+
+            <Grid item md={8}>
+              <TextField className="w-full my-3" disabled value={address || ""} />
+              <TextField className="w-full my-3" label="Username" disabled value={user?.username || ""} />
+              <TextField className="w-full my-3" label="Email" type="email" value={user?.email || ""} />
+              <TextField className="w-full my-3" label="Biografia" multiline rows={3} name="bio" value={user?.bio || ""} />
+              <DefaultButton variant="contained" onClick={() => handleSubmit(onSubmit)()}>
+                Salvar perfil
+              </DefaultButton>
+            </Grid>
+          </Grid>
+        )}
 
     </>
   )
