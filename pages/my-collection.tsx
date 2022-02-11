@@ -72,6 +72,8 @@ export default function MyAssets() {
         seller: i.seller,
         owner: i.owner,
         image: meta.data.image,
+        creator: i.creator,
+        description: meta.data.description,
       }
       return item
     }))

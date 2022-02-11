@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import Grid from '@mui/material/Grid'
+import { useRouter } from 'next/router'
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
@@ -8,6 +8,7 @@ import styled from '@emotion/styled'
 import { DefaultButton } from 'components/Button'
 import { useEffect, useRef, useState } from 'react';
 import ColorThief from "colorthief";
+import trimAccount from 'shared/helpers/trimAccount'
 
 const BuyButton = styled(DefaultButton)`
   width: 100%;
@@ -72,9 +73,28 @@ const NFTDescription = styled.p`
   margin-bottom: 0.5rem;
 `
 
+const CreatorPopup = styled.span`
+  background: #fff;
+  color: #000;
+  font-weight: bold;
+  padding: 0 0.5rem;
+  border-radius: 1rem;
+  width: 80%;
+  margin: 0.5rem 10%;
+  &:hover {
+    cursor: pointer;
+    transition: all 300ms linear;
+    box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%), 0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%);
+  }
+`
+
 export default function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
+  const router = useRouter()
+
   const [color, setColor] = useState("#fff")
   const imgRef = useRef(null)
+
+  console.log(nft)
 
   useEffect(() => {
     if (imgRef?.current && (imgRef?.current.width || imgRef?.current.offsetWidth)) {
@@ -93,12 +113,16 @@ export default function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) =
 
   return (
     <NFTCard variant='outlined' className="shadow" color={color}>
+
       <ImgContainer>
         <NFTImage crossOrigin={"anonymous"} src={nft.image} ref={imgRef} loading="lazy" />
       </ImgContainer>
 
       <CardContent>
         <NFTTitle>{nft.name}</NFTTitle>
+        <CreatorPopup className="shadow" onClick={() => router.push(`profile/${nft.creator}`)}>
+          Artista: {trimAccount(nft?.creator)}
+        </CreatorPopup>
         <NFTDescription>{nft.description}</NFTDescription>
         <NFTPrice style={{ fontSize: '24px' }}>{nft.price} ETH</NFTPrice>
       </CardContent>

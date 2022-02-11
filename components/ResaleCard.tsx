@@ -10,6 +10,8 @@ import { useEffect, useRef, useState } from 'react';
 import ColorThief from "colorthief";
 import { TextField } from '@mui/material';
 import BaseModal from './BaseModal';
+import trimAccount from 'shared/helpers/trimAccount'
+import { useRouter } from 'next/router'
 
 const BuyButton = styled(DefaultButton)`
   width: 100%;
@@ -74,6 +76,21 @@ const NFTDescription = styled.p`
   margin-bottom: 0.5rem;
 `
 
+const CreatorPopup = styled.span`
+  background: #fff;
+  color: #000;
+  font-weight: bold;
+  padding: 0 0.5rem;
+  border-radius: 1rem;
+  width: 80%;
+  margin: 0.5rem 10%;
+  &:hover {
+    cursor: pointer;
+    transition: all 300ms linear;
+    box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%), 0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%);
+  }
+`
+
 export default function AdCard({ nft, resale }: { nft: any, resale: (tokenId: string, price: string) => void }) {
   const [color, setColor] = useState("#fff")
   const imgRef = useRef(null)
@@ -83,6 +100,7 @@ export default function AdCard({ nft, resale }: { nft: any, resale: (tokenId: st
 
   const [tokenToSale, setTokenToSale] = useState<string>('');
 
+  const router = useRouter()
 
 
   const handleClickOpen = () => {
@@ -134,6 +152,9 @@ export default function AdCard({ nft, resale }: { nft: any, resale: (tokenId: st
 
         <CardContent>
           <NFTTitle>{nft.name}</NFTTitle>
+          <CreatorPopup className="shadow" onClick={() => router.push(`profile/${nft.creator}`)}>
+            Artista: {trimAccount(nft?.creator)}
+          </CreatorPopup>
           <NFTDescription>{nft.description}</NFTDescription>
           <NFTPrice style={{ fontSize: '24px' }}>{nft.price} ETH</NFTPrice>
         </CardContent>
