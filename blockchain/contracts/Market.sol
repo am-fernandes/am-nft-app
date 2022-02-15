@@ -22,7 +22,7 @@ contract NFTMarket is ReentrancyGuard {
   // dono do contrato
   address payable owner;
   // preço de listagem do token
-  uint listingPrice = 0.0 ether;
+  // uint listingPrice = 0.0 ether;
 
   address payable mktplaceAddress = payable(0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199);
 
@@ -59,22 +59,21 @@ contract NFTMarket is ReentrancyGuard {
     bool sold
   );
 
-  /* Returns the listing price of the contract */
-  function getListingPrice() public view returns (uint) {
-    return listingPrice;
-  }
-  
+  // /* Returns the listing price of the contract */
+  // function getListingPrice() public view returns (uint) {
+  //   return listingPrice;
+  // }
+
   /* Places an item for sale on the marketplace */
   // Pesquisar o que seria o tipo nonReentrant//
   // pesquisar sobre reentrant atack
-
   function createMarketItem(
     address nftContract,
     uint tokenId,
     uint price
   ) public payable nonReentrant {
     require(price > 0, "Price must be at least 1 wei");
-    require(msg.value == listingPrice, "Price must be equal to listing price");
+    // require(msg.value == listingPrice, "Price must be equal to listing price");
 
     _itemIds.increment();
     uint itemId = _itemIds.current();
@@ -143,7 +142,7 @@ contract NFTMarket is ReentrancyGuard {
 
     console.log("owener: %s", owner);
     // pagar o dono do contrato, transferindo a comissão
-    payable(owner).transfer(listingPrice);
+    // payable(owner).transfer(listingPrice);
   }
 
   /* Returns all unsold market items */
@@ -217,4 +216,33 @@ contract NFTMarket is ReentrancyGuard {
     }
     return items;
   }
+
+  function fetchCreatedByAddress(address userAddress) public view returns (MarketItem[] memory) {
+    uint total = _itemIds.current();
+    uint totalCreated = 0;
+
+    uint i = 0;
+    uint createdIndex = 0;
+
+    for (i = 1; i <= total; i = SafeMath.add(i, 1)) {
+      if (idToMarketItem[i].creator == userAddress) {
+        totalCreated = SafeMath.add(totalCreated, 1);
+      }
+    }
+
+    MarketItem[] memory items = new MarketItem[](totalCreated);
+
+    for (i = 1; i <= total; i = SafeMath.add(i, 1)) { 
+      if (idToMarketItem[i].creator == userAddress) {
+        MarketItem memory currentItem = idToMarketItem[i];
+
+        items[createdIndex] = currentItem;
+
+        createdIndex = SafeMath.add(createdIndex, 1);
+      }
+    }
+
+    return items;
+  }
+
 }

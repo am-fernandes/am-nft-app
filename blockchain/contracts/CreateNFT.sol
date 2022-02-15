@@ -15,6 +15,10 @@ contract CreateNFT is ERC721URIStorage {
         contractAddress = marketplaceAddress; //
     }
 
+    function approveNFTHandle(address nftMarketAddress, uint tokenId) public {
+        approve(nftMarketAddress, tokenId);
+    }
+
     function createToken(string memory tokenURI)
         public
         returns (uint256)
@@ -27,7 +31,7 @@ contract CreateNFT is ERC721URIStorage {
         _setTokenURI(newItemId, tokenURI);
 
         setApprovalForAll(contractAddress, true);
-
+        
         return newItemId;
     }
 }

@@ -1,7 +1,7 @@
-import { useEffect, useRef, useContext } from "react";
+import { useEffect, useRef } from "react";
 import Jazzicon from "@metamask/jazzicon";
 import styled from "@emotion/styled";
-import { WalletContext } from 'context/WalletContext'
+import useWallet from 'hooks/useWallet'
 
 const Icon = styled.div`
   margin: 0 0 0 16px;
@@ -12,16 +12,14 @@ const Icon = styled.div`
 
 export default function Identicon() {
   const ref = useRef<HTMLDivElement>();
-  // const { account } = useEthers();
-
-  const { wallet } = useContext(WalletContext)
+  const { address } = useWallet()
 
   useEffect(() => {
-    if (wallet && ref.current) {
+    if (address && ref.current) {
       ref.current.innerHTML = "";
-      ref.current.appendChild(Jazzicon(24, parseInt(wallet?.address?.slice(2, 10), 16)));
+      ref.current.appendChild(Jazzicon(24, parseInt(address?.slice(2, 10), 16)));
     }
-  }, [wallet]);
+  }, [address]);
 
   return <Icon ref={ref as any} />;
 }

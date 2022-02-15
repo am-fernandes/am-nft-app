@@ -1,155 +1,150 @@
 /* eslint-disable @next/next/no-img-element */
-import Container from '@mui/material/Container';
-import Navbar from 'components/Navbar'
-import { useState, useContext } from 'react';
-import { create as ipfsHttpClient } from 'ipfs-http-client'
+import { useState, useEffect } from 'react';
 import { ethers } from 'ethers'
-import Web3Modal from 'web3modal'
-import { WalletContext } from 'context/WalletContext'
 import Grid from '@mui/material/Grid'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import FormControl from '@mui/material/FormControl';
+import { useForm } from 'react-hook-form';
+import { InputEdit } from 'components/Form/FormComponents'
+import { DefaultButton } from 'components/Button'
+import styled from '@emotion/styled';
+import ipfsUploader from 'shared/helpers/ipfsUploader';
+import useWallet from 'hooks/useWallet';
+import { nftContract, nftaddress, marketContract } from 'shared/contracts/instance'
+import { useRouter } from 'next/router';
 
-//@ts-ignore
-const client = ipfsHttpClient('https://ipfs.infura.io:5001/api/v0')
+const CreateNFTButton = styled(DefaultButton)`
+  width: 50%;
+  margin: 0 25%;
+  background-color: #000;
+  &:hover {
+    background: rgba(0, 0, 0, 0.85);
+  }
+`
+interface NFTMetadata {
+  description: string
+  name: string
+  price: string
+  file: FileList
+}
 
-import {
-  nftaddress, nftmarketaddress
-} from '../hardhat/config'
-
-
-import NFT from '../hardhat/artifacts/contracts/CreateNFT.sol/CreateNFT.json'
-import Market from '../hardhat/artifacts/contracts/Market.sol/NFTMarket.json'
+const toBase64 = (file: File) => new Promise((resolve, reject) => {
+  if (!file) return reject("NO FILE")
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = error => reject(error);
+});
 
 export default function CreateItem() {
-  const [fileUrl, setFileUrl] = useState(null)
-  const [formInput, updateFormInput] = useState({ price: '', name: '', description: '' })
-  // const router = useRouter()
-  const { wallet } = useContext(WalletContext)
+  const router = useRouter()
 
-  async function onChange(e) {
-    const file = e.target.files[0]
-    try {
-      const added = await client.add(
-        file,
-        {
-          progress: (prog) => console.log(`received: ${prog}`)
-        }
-      )
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`
-      setFileUrl(url)
-    } catch (error) {
-      console.log('Error uploading file: ', error)
+  const { getConnection } = useWallet()
+
+  const { handleSubmit, control, register, watch } = useForm<NFTMetadata>({});
+
+  const [imagePreview, setImagePreview] = useState<string>()
+
+  const watchNFTFile = watch('file')
+
+  useEffect(() => {
+    if (watchNFTFile) {
+      console.log(typeof watchNFTFile)
+      const file = watchNFTFile[0]
+
+      if (file) {
+        toBase64(file).then((res) => {
+          setImagePreview(res as unknown as string)
+        }).catch((error) => {
+          throw new Error(error)
+        })
+      }
     }
+  }, [watchNFTFile])
+
+  const imageUpload = async (files: FileList): Promise<string> => {
+    const file = files[0];
+
+    if (!file) throw new Error('no file')
+
+    return ipfsUploader(file)
   }
 
-  async function createMarket() {
-    const { name, description, price } = formInput
-    if (!name || !description || !price || !fileUrl) return
-    /* first, upload to IPFS */
-    const data = JSON.stringify({
-      name, description, image: fileUrl
-    })
-    try {
-      const added = await client.add(data)
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`
-      /* after file is uploaded to IPFS, pass the URL to save it on Polygon */
-      createSale(url)
-    } catch (error) {
-      console.log('Error uploading file: ', error)
-    }
+  const metadateUpload = async (
+    image: string,
+    name: string,
+    description: string): Promise<string> => {
+    if (!image || !name || !description) throw new Error("incomplete data")
+
+    return ipfsUploader(JSON.stringify({
+      image,
+      name,
+      description
+    }))
   }
 
-  async function createSale(url) {
-    const web3Modal = new Web3Modal()
-    const connection = await web3Modal.connect()
-    const provider = new ethers.providers.Web3Provider(connection)
-    const signer = provider.getSigner()
+  const mintNFT = async (metadataURL: string): Promise<any> => {
+    if (!metadataURL) throw new Error('no metadata url')
+    const { signer } = await getConnection()
 
-    /* next, create the item */
-    let contract = new ethers.Contract(nftaddress, NFT.abi, signer)
-    let transaction = await contract.createToken(url)
-    let tx = await transaction.wait()
-    let event = tx.events[0]
-    let value = event.args[2]
-    let tokenId = value.toNumber()
+    const contract = nftContract(signer)
 
-    const price = ethers.utils.parseUnits(formInput.price, 'ether')
+    const transaction = await contract.createToken(metadataURL)
+    const tx = await transaction.wait()
+    const event = tx.events[0]
+    const value = event.args[2]
+    const tokenId = value.toNumber()
 
-    /* then list the item for sale on the marketplace */
-    contract = new ethers.Contract(nftmarketaddress, Market.abi, signer)
-    let listingPrice = await contract.getListingPrice()
-    listingPrice = listingPrice.toString()
-
-    transaction = await contract.createMarketItem(nftaddress, tokenId, price, { value: listingPrice })
-    await transaction.wait()
-    // router.push('/')
+    return tokenId
   }
+
+  const listToMarket = async (tokenId: string, price: string) => {
+    if (!tokenId || !price) throw new Error('no token id or pricing');
+
+    const { signer } = await getConnection()
+
+    const mktPrice = ethers.utils.parseUnits(price, 'ether')
+
+    const contract = marketContract(signer)
+    const transaction = await contract.createMarketItem(nftaddress, tokenId, mktPrice)
+    const tx = await transaction.wait()
+
+    const event = tx.events[0]
+
+    console.log(event)
+
+    alert('Seu NFT foi criado com sucesso!')
+
+    router.push('/')
+  }
+
+  const onSubmit = async ({ file, description, name, price }: NFTMetadata) => {
+    if (!file.length) throw new Error("no file");
+
+    const artURL = await imageUpload(file)
+    const ipfsMetadata = await metadateUpload(artURL, name, description)
+
+    const tokenId = await mintNFT(ipfsMetadata)
+
+    await listToMarket(tokenId, price)
+  };
 
   return (
-    <Container style={{ marginTop: 64 }} className='p-4'>
-      <Navbar />
-
-      <Grid container spacing={2} sx={{ marginTop: 16, paddingLeft: '20%', paddingRight: '20%' }}>
-        <Grid item md={4}>
-          <TextField
-            sx={{ width: '100%' }}
-            placeholder="Nome do NFT"
-            onChange={e => updateFormInput({ ...formInput, name: e.target.value })}
-          />
-        </Grid>
-
-        <Grid item md={4}>
-          <TextField
-            sx={{ width: '100%' }}
-            placeholder="Preço da arte em ETH"
-            type="number"
-            onChange={e => updateFormInput({ ...formInput, price: e.target.value })}
-          />
-        </Grid>
-
-        <Grid item md={4}>
-          <TextField
-            sx={{ width: '100%' }}
-            type="file"
-            name="Asset"
-            className="my-4"
-            onChange={onChange}
-          />
-        </Grid>
-
-        <Grid item md={12}>
-          <TextField
-            sx={{ width: '100%' }}
-            placeholder="Descrição da arte"
-            multiline
-            rows={3}
-            onChange={e => updateFormInput({ ...formInput, description: e.target.value })}
-          />
-        </Grid>
-
-
-
-
-
-
-        <Grid item md={12}>
-          {fileUrl && (
-            <img style={{ position: 'relative', left: '50%', transform: 'translateX(-50%)' }} alt="Imagem do NFT" width="150" src={fileUrl} />
-          )}
-        </Grid>
-
-        <Grid item md={12}>
-          <Button variant="contained" color="secondary" onClick={createMarket}>
-            Criar NFT
-          </Button>
-        </Grid>
-
-
-
-
+    <Grid container spacing={10}>
+      <Grid item md={4}>
+        <label htmlFor="nftFile" className='block mb-4 font-bold text-lg text-black'>Faça o upload do arquivo PNG/JPG/GIF</label>
+        <input id="nftFile" type="file" accept="image/x-png,image/gif,image/jpeg" {...register('file', { required: true })} />
+        {imagePreview && (
+          <img alt="Imagem do NFT" src={imagePreview} className="my-4 bg-white border shadow" />
+        )}
       </Grid>
-    </Container>
+
+      <Grid item md={8}>
+        <InputEdit grid={12} name="name" control={control} label="Nome da arte" />
+        <InputEdit grid={12} name="price" control={control} label="Preço da arte em ETH" type="number" />
+        <InputEdit grid={12} control={control} label="Descrição da arte" multiline rows={3} name="description" />
+        <CreateNFTButton variant="contained" onClick={() => handleSubmit(onSubmit)()}>
+          Criar NFT
+        </CreateNFTButton>
+      </Grid>
+    </Grid>
   )
 }

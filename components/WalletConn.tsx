@@ -1,27 +1,25 @@
-import { useState, useContext } from "react";
+import { useState } from "react";
 import { formatEther } from "@ethersproject/units";
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+import { DefaultButton } from 'components/Button';
 import Wallet from '@mui/icons-material/AccountBalanceWalletOutlined'
 import styled from '@emotion/styled'
 import JazzIcon from './JazzIcon'
 import AccountDetails from "./AccountDetails";
-import trimAccount from "helpers/trimAccount";
-import Web3Modal from 'web3modal'
-import { ethers, BigNumber } from "ethers";
-import { WalletContext } from 'context/WalletContext'
-
-export const DefaultButton = styled(Button)`
-  border-radius: 16px;
-  box-shadow: none;
-  padding: 8px 20px;
-`
+import trimAccount from "shared/helpers/trimAccount";
+import { BigNumber } from "ethers";
+import useWallet from "hooks/useWallet";
 
 const AccountButton = styled(DefaultButton)`
   background-color: #000;
   &:hover {
     background: rgba(0, 0, 0, 0.85);
   }
+`
+
+const BalanceBadge = styled(Box)`
+  background-color: rgba(99, 206, 204, 0.6);
+  border-radius: 16px;
 `
 
 function formatBalance(accountBalance?: BigNumber): string {
@@ -31,35 +29,10 @@ function formatBalance(accountBalance?: BigNumber): string {
 }
 
 export default function WalletConn() {
-  // const { activateBrowserWallet, account } = useEthers()
-  // const accountBalance = useEtherBalance(account)
-
-  const [address, setAddress] = useState<string>('')
-  const [balance, setBalance] = useState<BigNumber>()
-
-
-  const { editWallet } = useContext(WalletContext)
+  const { address, balance, getConnection } = useWallet()
 
   async function handleConnectWallet() {
-    const web3Modal = new Web3Modal()
-
-    const instance = await web3Modal.connect();
-
-    const provider = new ethers.providers.Web3Provider(instance);
-    const signer = provider.getSigner();
-
-    const _address = await signer.getAddress()
-    const _balance = await signer.getBalance()
-
-    setAddress(_address)
-    setBalance(_balance)
-
-    editWallet({
-      provider,
-      signer,
-      address: _address,
-      balance: _balance
-    })
+    await getConnection()
   }
 
   const [open, setOpen] = useState(false);
@@ -75,18 +48,18 @@ export default function WalletConn() {
   return (
     <>
       {address ?
-        (<Box style={{ backgroundColor: "#d6d6d6", borderRadius: 16 }}>
-          <span className="ml-4 mr-2 pt-8" style={{ fontSize: 14, fontWeight: '600' }}>{formatBalance(balance)} ETH</span>
+        (<BalanceBadge>
+          <span className="ml-4 mr-3 pt-8 text-sm font-bold">{formatBalance(balance)} ETH</span>
           <AccountButton variant="contained" onClick={handleClickOpen}>
             {trimAccount(address)}
-
             <JazzIcon />
           </AccountButton>
-        </Box>) :
-        <DefaultButton color="secondary" startIcon={<Wallet />} onClick={handleConnectWallet}>Conectar carteira</DefaultButton>
+        </BalanceBadge>) :
+        <AccountButton variant="contained" startIcon={<Wallet />} onClick={handleConnectWallet}>
+          Conectar carteira
+        </AccountButton>
       }
 
       <AccountDetails open={open} handleClose={handleClose} />
-    </>
-  )
+    </>)
 }
