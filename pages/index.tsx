@@ -8,6 +8,10 @@ import AdCard from 'components/AdCard'
 import useWallet from 'hooks/useWallet'
 import { marketContract, nftContract, nftaddress } from 'shared/contracts/instance'
 import Masonry from '@mui/lab/Masonry';
+import Skeleton from '@mui/material/Skeleton';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import SkeletonCard from 'components/SkeletonCard'
 
 export default function Home() {
   const { getConnection } = useWallet()
@@ -74,13 +78,29 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <Masonry columns={4} spacing={4} >
-        {
-          nfts.map((nft, i) => (
-            <AdCard nft={nft} buyNft={buyNft} key={i} />
-          ))
-        }
-      </Masonry>
+      {nfts?.length ? (
+        <Masonry columns={4} spacing={4}>
+          {
+            nfts.map((nft, i) => (
+              <AdCard nft={nft} buyNft={buyNft} key={i} />
+            ))
+          }
+        </Masonry>) : (
+        <Grid container spacing={2}>
+          <Grid item md={3}>
+            <SkeletonCard />
+          </Grid>
+          <Grid item md={3}>
+            <SkeletonCard />
+          </Grid>
+          <Grid item md={3}>
+            <SkeletonCard />
+          </Grid>
+          <Grid item md={3}>
+            <SkeletonCard />
+          </Grid>
+        </Grid>
+      )}
     </>
   )
 }

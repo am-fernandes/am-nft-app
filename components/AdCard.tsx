@@ -6,7 +6,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import styled from '@emotion/styled'
 import { DefaultButton } from 'components/Button'
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useCallback, useRef, useState } from 'react';
 import ColorThief from "colorthief";
 import trimAccount from 'shared/helpers/trimAccount'
 
@@ -117,7 +117,7 @@ const getArtist = async (address: string): Promise<string> => {
 function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
   const router = useRouter()
 
-  const [color, setColor] = useState("#fff")
+  const [color, setColor] = useState("#eee")
   const [artist, setArtist] = useState()
   const imgRef = useRef(null)
 
@@ -127,20 +127,20 @@ function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
       .catch((e) => console.log(e))
   }, [nft])
 
-  useEffect(() => {
-    if (imgRef?.current && (imgRef?.current.width || imgRef?.current.offsetWidth)) {
-      try {
-        const colorThief = new ColorThief();
+  // useEffect(() => {
+  //   if (imgRef?.current && (imgRef?.current.width || imgRef?.current.offsetWidth)) {
+  //     try {
+  //       const colorThief = new ColorThief();
 
-        const prominentColor = colorThief.getColor(imgRef?.current, 25)
+  //       const prominentColor = colorThief.getColor(imgRef?.current, 25)
 
-        setColor(`rgba(${prominentColor.join()}, 0.35)`)
-      }
-      catch (e) {
-        console.error(e)
-      }
-    }
-  }, [imgRef])
+  //       setColor(`rgba(${prominentColor.join()}, 0.35)`)
+  //     }
+  //     catch (e) {
+  //       console.error(e)
+  //     }
+  //   }
+  // }, [imgRef])
 
   return (
     <NFTCard variant='outlined' className="shadow" color={color}>
@@ -152,7 +152,7 @@ function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
       <CardContent>
         <NFTTitle>{nft.name}</NFTTitle>
         <CreatorPopup className="shadow" onClick={() => router.push(`profile/${nft.creator}`)}>
-          Artista: @{artist}
+          Artista: {artist}
         </CreatorPopup>
         <NFTDescription>{nft.description}</NFTDescription>
         <NFTPrice style={{ fontSize: '24px' }}>{nft.price} ETH</NFTPrice>
