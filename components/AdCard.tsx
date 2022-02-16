@@ -6,10 +6,8 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import styled from '@emotion/styled'
 import { DefaultButton } from 'components/Button'
-import React, { useEffect, useRef, useState } from 'react';
-import ColorThief from "colorthief";
+import React, { useEffect, useState } from 'react';
 import trimAccount from 'shared/helpers/trimAccount'
-
 
 const BuyButton = styled(DefaultButton)`
   width: 100%;
@@ -117,49 +115,47 @@ const getArtist = async (address: string): Promise<string> => {
 function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
   const router = useRouter()
 
-  const [color, setColor] = useState("#fff")
-  const [artist, setArtist] = useState()
-  const imgRef = useRef(null)
+  const [artist, setArtist] = useState<string>('')
+  const [startSubmit, setStartSubmit] = useState<boolean>(false)
 
   useEffect(() => {
+    console.log(nft)
+
     getArtist(nft?.creator)
       .then((r) => setArtist(r))
       .catch((e) => console.log(e))
   }, [nft])
 
-  useEffect(() => {
-    if (imgRef?.current && (imgRef?.current.width || imgRef?.current.offsetWidth)) {
-      try {
-        const colorThief = new ColorThief();
+  const wrappedFn = async () => {
+    try {
+      setStartSubmit(true)
 
-        const prominentColor = colorThief.getColor(imgRef?.current, 25)
-
-        setColor(`rgba(${prominentColor.join()}, 0.35)`)
-      }
-      catch (e) {
-        console.error(e)
-      }
+      await buyNft(nft)
+      setStartSubmit(false)
+    } catch (e) {
+      setStartSubmit(false)
+      console.log(e)
     }
-  }, [imgRef])
+  }
 
   return (
-    <NFTCard variant='outlined' className="shadow" color={color}>
+    <NFTCard variant='outlined' className="shadow" color={nft?.color || "#fff"}>
 
       <ImgContainer>
-        <NFTImage crossOrigin={"anonymous"} src={nft.image} ref={imgRef} loading="lazy" />
+        <NFTImage src={nft.image} loading="lazy" />
       </ImgContainer>
 
       <CardContent>
         <NFTTitle>{nft.name}</NFTTitle>
         <CreatorPopup className="shadow" onClick={() => router.push(`profile/${nft.creator}`)}>
-          Artista: @{artist}
+          Artista: {artist}
         </CreatorPopup>
         <NFTDescription>{nft.description}</NFTDescription>
         <NFTPrice style={{ fontSize: '24px' }}>{nft.price} ETH</NFTPrice>
       </CardContent>
 
       <CardActions>
-        <BuyButton onClick={() => buyNft(nft)} variant="contained">Comprar</BuyButton>
+        <BuyButton disabled={startSubmit} loading={startSubmit} onClick={wrappedFn} variant="contained">Comprar</BuyButton>
       </CardActions>
     </NFTCard>
   )

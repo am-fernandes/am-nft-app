@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ethers } from 'ethers'
 import Grid from '@mui/material/Grid'
 import { useForm } from 'react-hook-form';
@@ -10,6 +10,7 @@ import ipfsUploader from 'shared/helpers/ipfsUploader';
 import useWallet from 'hooks/useWallet';
 import { nftContract, nftaddress, marketContract } from 'shared/contracts/instance'
 import { useRouter } from 'next/router';
+import ColorThief from "colorthief";
 
 const CreateNFTButton = styled(DefaultButton)`
   width: 50%;
@@ -36,12 +37,14 @@ const toBase64 = (file: File) => new Promise((resolve, reject) => {
 
 export default function CreateItem() {
   const router = useRouter()
+  const imgRef = useRef(null)
 
   const { getConnection } = useWallet()
 
   const { handleSubmit, control, register, watch } = useForm<NFTMetadata>({});
 
   const [imagePreview, setImagePreview] = useState<string>()
+  const [startSubmit, setStartSubmit] = useState<boolean>(false)
 
   const watchNFTFile = watch('file')
 
@@ -68,16 +71,38 @@ export default function CreateItem() {
     return ipfsUploader(file)
   }
 
+  const getColor = async (): Promise<string> => {
+    let color = "#fff"
+
+    if (imgRef?.current && (imgRef?.current.width || imgRef?.current.offsetWidth)) {
+      try {
+        const colorThief = new ColorThief();
+
+        const prominentColor = await colorThief.getColor(imgRef?.current, 25)
+
+        color = `rgba(${prominentColor.join()}, 0.35)`
+      }
+      catch (e) {
+        console.error(e)
+      }
+    }
+
+    return color
+  }
+
   const metadateUpload = async (
     image: string,
     name: string,
     description: string): Promise<string> => {
     if (!image || !name || !description) throw new Error("incomplete data")
 
+    const color = await getColor()
+
     return ipfsUploader(JSON.stringify({
       image,
       name,
-      description
+      description,
+      color
     }))
   }
 
@@ -117,14 +142,24 @@ export default function CreateItem() {
   }
 
   const onSubmit = async ({ file, description, name, price }: NFTMetadata) => {
-    if (!file.length) throw new Error("no file");
+    try {
 
-    const artURL = await imageUpload(file)
-    const ipfsMetadata = await metadateUpload(artURL, name, description)
+      if (!file.length) throw new Error("no file");
 
-    const tokenId = await mintNFT(ipfsMetadata)
+      setStartSubmit(true)
 
-    await listToMarket(tokenId, price)
+      const artURL = await imageUpload(file)
+      const ipfsMetadata = await metadateUpload(artURL, name, description)
+
+      const tokenId = await mintNFT(ipfsMetadata)
+
+      await listToMarket(tokenId, price)
+
+      setStartSubmit(false)
+    } catch (error) {
+      setStartSubmit(false)
+    }
+
   };
 
   return (
@@ -133,7 +168,7 @@ export default function CreateItem() {
         <label htmlFor="nftFile" className='block mb-4 font-bold text-lg text-black'>Faça o upload do arquivo PNG/JPG/GIF</label>
         <input id="nftFile" type="file" accept="image/x-png,image/gif,image/jpeg" {...register('file', { required: true })} />
         {imagePreview && (
-          <img alt="Imagem do NFT" src={imagePreview} className="my-4 bg-white border shadow" />
+          <img crossOrigin={"anonymous"} ref={imgRef} alt="Imagem do NFT" src={imagePreview} className="my-4 bg-white border shadow" />
         )}
       </Grid>
 
@@ -141,7 +176,7 @@ export default function CreateItem() {
         <InputEdit grid={12} name="name" control={control} label="Nome da arte" />
         <InputEdit grid={12} name="price" control={control} label="Preço da arte em ETH" type="number" />
         <InputEdit grid={12} control={control} label="Descrição da arte" multiline rows={3} name="description" />
-        <CreateNFTButton variant="contained" onClick={() => handleSubmit(onSubmit)()}>
+        <CreateNFTButton disabled={startSubmit} loading={startSubmit} variant="contained" onClick={() => handleSubmit(onSubmit)()}>
           Criar NFT
         </CreateNFTButton>
       </Grid>

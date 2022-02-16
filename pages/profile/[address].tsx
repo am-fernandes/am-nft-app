@@ -9,6 +9,7 @@ import { Typography } from '@mui/material'
 import { Frame, ProfilePhoto } from 'pages/profile'
 import Masonry from '@mui/lab/Masonry';
 import GalleryCard from 'components/GalleryCard'
+import SkeletonCard from 'components/SkeletonCard'
 
 let rpcEndpoint = ''
 
@@ -73,6 +74,7 @@ export default function Profile() {
         image: meta.data.image,
         name: meta.data.name,
         description: meta.data.description,
+        color: meta.data?.color,
       }
       return item
     }))
@@ -112,13 +114,30 @@ export default function Profile() {
         <p className="text-center mt-4">{artist?.bio}</p>
       </Banner>
 
-      <Masonry columns={4} spacing={4} >
-        {
-          nfts?.map((nft, i) => (
-            <GalleryCard nft={nft} key={i} />
-          ))
-        }
-      </Masonry>
+      {nfts?.length ? (
+        <Masonry columns={4} spacing={4}>
+          {
+            nfts.map((nft, i) => (
+              <GalleryCard nft={nft} key={i} />
+            ))
+          }
+        </Masonry>) : (
+        <Grid container spacing={2}>
+          <Grid item md={3}>
+            <SkeletonCard />
+          </Grid>
+          <Grid item md={3}>
+            <SkeletonCard />
+          </Grid>
+          <Grid item md={3}>
+            <SkeletonCard />
+          </Grid>
+          <Grid item md={3}>
+            <SkeletonCard />
+          </Grid>
+        </Grid>
+      )}
+
     </>
   )
 }
