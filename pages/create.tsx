@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ethers } from 'ethers'
 import Grid from '@mui/material/Grid'
 import { useForm } from 'react-hook-form';
@@ -10,6 +10,7 @@ import ipfsUploader from 'shared/helpers/ipfsUploader';
 import useWallet from 'hooks/useWallet';
 import { nftContract, nftaddress, marketContract } from 'shared/contracts/instance'
 import { useRouter } from 'next/router';
+import ColorThief from "colorthief";
 
 const CreateNFTButton = styled(DefaultButton)`
   width: 50%;
@@ -36,6 +37,7 @@ const toBase64 = (file: File) => new Promise((resolve, reject) => {
 
 export default function CreateItem() {
   const router = useRouter()
+  const imgRef = useRef(null)
 
   const { getConnection } = useWallet()
 
@@ -68,16 +70,38 @@ export default function CreateItem() {
     return ipfsUploader(file)
   }
 
+  const getColor = async (): Promise<string> => {
+    let color = "#fff"
+
+    if (imgRef?.current && (imgRef?.current.width || imgRef?.current.offsetWidth)) {
+      try {
+        const colorThief = new ColorThief();
+
+        const prominentColor = await colorThief.getColor(imgRef?.current, 25)
+
+        color = `rgba(${prominentColor.join()}, 0.35)`
+      }
+      catch (e) {
+        console.error(e)
+      }
+    }
+
+    return color
+  }
+
   const metadateUpload = async (
     image: string,
     name: string,
     description: string): Promise<string> => {
     if (!image || !name || !description) throw new Error("incomplete data")
 
+    const color = await getColor()
+
     return ipfsUploader(JSON.stringify({
       image,
       name,
-      description
+      description,
+      color
     }))
   }
 
@@ -133,7 +157,7 @@ export default function CreateItem() {
         <label htmlFor="nftFile" className='block mb-4 font-bold text-lg text-black'>Faça o upload do arquivo PNG/JPG/GIF</label>
         <input id="nftFile" type="file" accept="image/x-png,image/gif,image/jpeg" {...register('file', { required: true })} />
         {imagePreview && (
-          <img alt="Imagem do NFT" src={imagePreview} className="my-4 bg-white border shadow" />
+          <img crossOrigin={"anonymous"} ref={imgRef} alt="Imagem do NFT" src={imagePreview} className="my-4 bg-white border shadow" />
         )}
       </Grid>
 
