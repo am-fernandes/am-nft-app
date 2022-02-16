@@ -8,9 +8,7 @@ import AdCard from 'components/AdCard'
 import useWallet from 'hooks/useWallet'
 import { marketContract, nftContract, nftaddress } from 'shared/contracts/instance'
 import Masonry from '@mui/lab/Masonry';
-import Skeleton from '@mui/material/Skeleton';
 import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
 import SkeletonCard from 'components/SkeletonCard'
 
 export default function Home() {

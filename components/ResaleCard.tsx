@@ -1,13 +1,11 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable @next/next/no-img-element */
-import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import styled from '@emotion/styled'
 import { DefaultButton } from 'components/Button'
-import React, { useEffect, useRef, useState } from 'react';
-import ColorThief from "colorthief";
+import React, { useState } from 'react';
 import { TextField } from '@mui/material';
 import BaseModal from './BaseModal';
 import trimAccount from 'shared/helpers/trimAccount'
@@ -92,9 +90,6 @@ const CreatorPopup = styled.span`
 `
 
 function ResaleCard({ nft, resale }: { nft: any, resale: (tokenId: string, price: string) => void }) {
-  const [color, setColor] = useState("#fff")
-  const imgRef = useRef(null)
-
   const [open, setOpen] = useState(false);
   const [price, setPrice] = useState<string>('');
 
@@ -111,28 +106,12 @@ function ResaleCard({ nft, resale }: { nft: any, resale: (tokenId: string, price
     setOpen(false);
   };
 
-  useEffect(() => {
-    if (imgRef?.current && (imgRef?.current.width || imgRef?.current.offsetWidth)) {
-      try {
-        const colorThief = new ColorThief();
-
-        const prominentColor = colorThief.getColor(imgRef?.current, 25)
-
-        setColor(`rgba(${prominentColor.join()}, 0.35)`)
-      }
-      catch (e) {
-        console.error(e)
-      }
-    }
-  }, [imgRef])
-
   const resaleHandle = (tokenId: string) => {
     // resale( tokenId, '8000')
     setTokenToSale(tokenId)
 
     handleClickOpen()
   }
-
 
   const confirmResale = () => {
     if (price) {
@@ -145,9 +124,9 @@ function ResaleCard({ nft, resale }: { nft: any, resale: (tokenId: string, price
 
   return (
     <>
-      <NFTCard variant='outlined' className="shadow" color={color}>
+      <NFTCard variant='outlined' className="shadow" color={nft?.color || "#fff"}>
         <ImgContainer>
-          <NFTImage crossOrigin={"anonymous"} src={nft.image} ref={imgRef} loading="lazy" />
+          <NFTImage src={nft.image} loading="lazy" />
         </ImgContainer>
 
         <CardContent>
