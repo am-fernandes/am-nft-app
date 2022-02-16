@@ -44,6 +44,7 @@ export default function CreateItem() {
   const { handleSubmit, control, register, watch } = useForm<NFTMetadata>({});
 
   const [imagePreview, setImagePreview] = useState<string>()
+  const [startSubmit, setStartSubmit] = useState<boolean>(false)
 
   const watchNFTFile = watch('file')
 
@@ -141,14 +142,24 @@ export default function CreateItem() {
   }
 
   const onSubmit = async ({ file, description, name, price }: NFTMetadata) => {
-    if (!file.length) throw new Error("no file");
+    try {
 
-    const artURL = await imageUpload(file)
-    const ipfsMetadata = await metadateUpload(artURL, name, description)
+      if (!file.length) throw new Error("no file");
 
-    const tokenId = await mintNFT(ipfsMetadata)
+      setStartSubmit(true)
 
-    await listToMarket(tokenId, price)
+      const artURL = await imageUpload(file)
+      const ipfsMetadata = await metadateUpload(artURL, name, description)
+
+      const tokenId = await mintNFT(ipfsMetadata)
+
+      await listToMarket(tokenId, price)
+
+      setStartSubmit(false)
+    } catch (error) {
+      setStartSubmit(false)
+    }
+
   };
 
   return (
@@ -165,7 +176,7 @@ export default function CreateItem() {
         <InputEdit grid={12} name="name" control={control} label="Nome da arte" />
         <InputEdit grid={12} name="price" control={control} label="Preço da arte em ETH" type="number" />
         <InputEdit grid={12} control={control} label="Descrição da arte" multiline rows={3} name="description" />
-        <CreateNFTButton variant="contained" onClick={() => handleSubmit(onSubmit)()}>
+        <CreateNFTButton disabled={startSubmit} loading={startSubmit} variant="contained" onClick={() => handleSubmit(onSubmit)()}>
           Criar NFT
         </CreateNFTButton>
       </Grid>

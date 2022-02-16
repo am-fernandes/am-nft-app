@@ -116,6 +116,7 @@ function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
   const router = useRouter()
 
   const [artist, setArtist] = useState<string>('')
+  const [startSubmit, setStartSubmit] = useState<boolean>(false)
 
   useEffect(() => {
     console.log(nft)
@@ -124,6 +125,18 @@ function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
       .then((r) => setArtist(r))
       .catch((e) => console.log(e))
   }, [nft])
+
+  const wrappedFn = async () => {
+    try {
+      setStartSubmit(true)
+
+      await buyNft(nft)
+      setStartSubmit(false)
+    } catch (e) {
+      setStartSubmit(false)
+      console.log(e)
+    }
+  }
 
   return (
     <NFTCard variant='outlined' className="shadow" color={nft?.color || "#fff"}>
@@ -142,7 +155,7 @@ function AdCard({ nft, buyNft }: { nft: any, buyNft: (nft: any) => void }) {
       </CardContent>
 
       <CardActions>
-        <BuyButton onClick={() => buyNft(nft)} variant="contained">Comprar</BuyButton>
+        <BuyButton disabled={startSubmit} loading={startSubmit} onClick={wrappedFn} variant="contained">Comprar</BuyButton>
       </CardActions>
     </NFTCard>
   )
